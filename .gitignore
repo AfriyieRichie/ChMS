@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+!.env.example
+*.sqlite3
+*.log
+
+# Django
+staticfiles/
+mediafiles/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+web/.env.local
+!web/.env.example
+
+# Expo / React Native
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+*.env.local
+
+# Memory (not part of the project source)
+memory/

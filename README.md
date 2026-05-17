@@ -93,54 +93,67 @@ make down            # stop all containers
 
 ---
 
-## Deployment
+## Deployment (100% free tier)
 
-### Railway (backend) + Vercel (frontend)
+| Service | Provider | What it costs |
+|---------|----------|--------------|
+| Django API | [Render](https://render.com) | Free — sleeps after 15 min inactivity |
+| PostgreSQL | [Neon](https://neon.tech) | Free — 0.5 GB, no expiry |
+| Redis | [Upstash](https://upstash.com) | Free — 10k commands/day |
+| Frontend | [Vercel](https://vercel.com) | Free hobby plan |
 
-#### Backend on Railway
+> The Render free service has a ~30 s cold-start when it wakes up after sleeping.
+> That's fine for dev/staging. See `docs/DEPLOYMENT.md` for upgrade options.
 
-1. Create a new Railway project.
-2. Add a **PostgreSQL** plugin — Railway provisions the database automatically.
-3. Add a **Redis** plugin.
-4. Connect your GitHub repo and set the **Root Directory** to `backend/`.
-5. Set these environment variables in Railway's dashboard:
+### Step 1 — Neon (PostgreSQL)
+
+1. Sign up at [neon.tech](https://neon.tech) → create project `chms`.
+2. Copy the **Connection string** → you'll paste it as `DATABASE_URL` in Render.
+
+### Step 2 — Upstash (Redis)
+
+1. Sign up at [upstash.com](https://upstash.com) → **Create database** → pick a region.
+2. Copy the **Redis URL** → you'll paste it as `REDIS_URL` in Render.
+
+### Step 3 — Render (Django backend)
+
+1. Sign up at [render.com](https://render.com) → **New → Web Service**.
+2. Connect `AfriyieRichie/ChMS`; set **Root Directory** to `backend`.
+3. Render auto-detects the `Dockerfile`.
+4. Add these environment variables:
 
    | Variable | Value |
    |----------|-------|
-   | `DJANGO_SECRET_KEY` | a strong random key |
+   | `DJANGO_SECRET_KEY` | any 50-char random string |
    | `DJANGO_DEBUG` | `False` |
-   | `DJANGO_ALLOWED_HOSTS` | `your-app.railway.app` |
-   | `DATABASE_URL` | auto-filled by Railway Postgres plugin |
-   | `REDIS_URL` | auto-filled by Railway Redis plugin |
+   | `DJANGO_ALLOWED_HOSTS` | `your-app.onrender.com` |
+   | `DATABASE_URL` | paste from Neon |
+   | `REDIS_URL` | paste from Upstash |
    | `CORS_ALLOWED_ORIGINS` | your Vercel production URL |
    | `DJANGO_SETTINGS_MODULE` | `chms.settings.production` |
 
-6. Railway detects the `Dockerfile` automatically and builds it.
-7. After the first deploy, run the initial migration via the Railway shell:
+5. After the first deploy, open Render's **Shell** tab:
 
    ```bash
    python manage.py migrate
    python manage.py createsuperuser
    ```
 
-#### Frontend on Vercel
+### Step 4 — Vercel (Next.js frontend)
 
-1. Import the GitHub repo into Vercel.
-2. Set the **Root Directory** to `web/`.
-3. Add environment variables:
+1. Import `AfriyieRichie/ChMS` into Vercel; set **Root Directory** to `web`.
+2. Add environment variables:
 
-   | Variable | Scope |
-   |----------|-------|
-   | `NEXT_PUBLIC_API_URL` (production) | `https://your-app.railway.app/api/v1` |
-   | `NEXT_PUBLIC_API_URL` (preview) | `https://your-staging-app.railway.app/api/v1` |
+   | Variable | Scope | Value |
+   |----------|-------|-------|
+   | `NEXT_PUBLIC_API_URL` | Production | `https://your-app.onrender.com/api/v1` |
+   | `NEXT_PUBLIC_API_URL` | Preview | same Render URL |
 
-4. Vercel auto-deploys on every push to `main` (production) and every PR (preview).
+3. Vercel auto-deploys on push to `main` and on every PR.
 
-#### Pointing a Vercel preview at a Railway backend
+### Pointing Vercel previews at Render
 
-Vercel preview URLs follow the pattern `https://<project>-<hash>.vercel.app`. The backend's `CORS_ALLOWED_ORIGIN_REGEXES` already includes `^https://.*\.vercel\.app$`, so **no extra CORS config is needed** for previews.
-
-For the API URL, set `NEXT_PUBLIC_API_URL` in Vercel's **Preview** environment to your Railway staging backend URL. Each preview deploy picks this up automatically.
+No extra config needed — the backend already allows `^https://.*\.vercel\.app$`, so every preview URL is covered automatically.
 
 ---
 

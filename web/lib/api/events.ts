@@ -1,5 +1,7 @@
 import api from "@/lib/api";
 
+const h = (branchId: number) => ({ "X-Branch-Id": String(branchId) });
+
 export interface Event {
   id: number;
   branch: number;
@@ -35,46 +37,56 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
-const headers = (branchId: number) => ({ "X-Branch-Id": String(branchId) });
-
 export async function getEvents(
   branchId: number,
-  params?: { event_type?: string; page?: number }
+  params?: { event_type?: string; page?: number },
 ): Promise<PaginatedResponse<Event>> {
-  const { data } = await api.get("/api/v1/events/", { headers: headers(branchId), params });
+  const { data } = await api.get("/api/v1/events/", { headers: h(branchId), params });
   return data;
 }
 
 export async function getUpcomingEvents(branchId: number): Promise<Event[]> {
-  const { data } = await api.get("/api/v1/events/upcoming/", { headers: headers(branchId) });
+  const { data } = await api.get("/api/v1/events/upcoming/", { headers: h(branchId) });
   return data;
 }
 
-export async function createEvent(
-  payload: Partial<Event>,
-  branchId: number
-): Promise<Event> {
-  const { data } = await api.post("/api/v1/events/", payload, { headers: headers(branchId) });
+export async function createEvent(payload: Partial<Event>, branchId: number): Promise<Event> {
+  const { data } = await api.post("/api/v1/events/", payload, { headers: h(branchId) });
   return data;
 }
 
-export async function getEventRegistrations(
-  eventId: number,
-  branchId: number
-): Promise<EventRegistration[]> {
-  const { data } = await api.get(`/api/v1/events/${eventId}/registrations/`, {
-    headers: headers(branchId),
-  });
+export async function updateEvent(id: number, payload: Partial<Event>, branchId: number): Promise<Event> {
+  const { data } = await api.patch(`/api/v1/events/${id}/`, payload, { headers: h(branchId) });
   return data;
+}
+
+export async function deleteEvent(id: number, branchId: number): Promise<void> {
+  await api.delete(`/api/v1/events/${id}/`, { headers: h(branchId) });
+}
+
+export async function getEventRegistrations(eventId: number, branchId: number): Promise<EventRegistration[]> {
+  const { data } = await api.get(`/api/v1/events/${eventId}/registrations/`, { headers: h(branchId) });
+  return Array.isArray(data) ? data : data.results ?? [];
 }
 
 export async function registerForEvent(
   eventId: number,
   payload: { member?: number; notes?: string },
-  branchId: number
+  branchId: number,
 ): Promise<EventRegistration> {
-  const { data } = await api.post(`/api/v1/events/${eventId}/registrations/`, payload, {
-    headers: headers(branchId),
-  });
+  const { data } = await api.post(`/api/v1/events/${eventId}/registrations/`, payload, { headers: h(branchId) });
+  return data;
+}
+
+export async function checkInRegistration(
+  eventId: number,
+  regId: number,
+  branchId: number,
+): Promise<EventRegistration> {
+  const { data } = await api.post(
+    `/api/v1/events/${eventId}/registrations/${regId}/check-in/`,
+    {},
+    { headers: h(branchId) },
+  );
   return data;
 }

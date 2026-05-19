@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count, Q
 
 from rest_framework import status
 from rest_framework.decorators import action
@@ -24,8 +25,13 @@ CanManageHouseholds = make_capability_permission("households.manage")
 
 
 class HouseholdViewSet(BranchScopedViewSet):
-    queryset = Household.objects.filter(deleted_at__isnull=True)
     serializer_class = HouseholdSerializer
+
+    def get_queryset(self):
+        return (
+            Household.objects.filter(deleted_at__isnull=True)
+            .annotate(member_count=Count("members", filter=Q(members__deleted_at__isnull=True)))
+        )
 
     def get_permissions(self):
         if self.action in ("list", "retrieve"):
@@ -63,6 +69,10 @@ class MemberViewSet(BranchScopedViewSet):
                 | models.Q(phone__icontains=search)
                 | models.Q(email__icontains=search)
             )
+
+        household_id = self.request.query_params.get("household")
+        if household_id:
+            qs = qs.filter(household_id=household_id)
 
         return qs.distinct()
 

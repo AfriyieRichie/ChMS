@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { getMember, updateMember, getMemberGroups, getMemberDiscipleship, getMemberAttendance, type MemberDetail, type MemberAttendanceEntry } from "@/lib/api/members";
 import { getContributions } from "@/lib/api/finance";
+import { getHouseholds, type Household } from "@/lib/api/households";
 
 const BRANCH_ID = 1;
 
@@ -50,6 +51,7 @@ const editSchema = z.object({
   baptism_status: z.string().optional(),
   baptism_date: z.string().optional(),
   notes: z.string().optional(),
+  household: z.number().nullable().optional(),
 });
 
 type EditValues = z.infer<typeof editSchema>;
@@ -87,6 +89,12 @@ export default function MemberDetailPage() {
     enabled: tab === "discipleship",
   });
 
+  const { data: households } = useQuery({
+    queryKey: ["households", BRANCH_ID],
+    queryFn: () => getHouseholds(BRANCH_ID),
+    enabled: editing,
+  });
+
   const { data: attendanceHistory } = useQuery({
     queryKey: ["member-attendance", id, BRANCH_ID],
     queryFn: () => getMemberAttendance(id, BRANCH_ID),
@@ -111,6 +119,7 @@ export default function MemberDetailPage() {
       baptism_status: member.baptism_status || "",
       baptism_date: member.baptism_date || "",
       notes: member.notes || "",
+      household: member.household ?? null,
     } : undefined,
   });
 
@@ -258,6 +267,17 @@ export default function MemberDetailPage() {
             </FormField>
             <FormField label="Baptism Date">
               <input type="date" {...register("baptism_date")} className="w-full border rounded-lg px-3 py-2 text-sm" />
+            </FormField>
+            <FormField label="Household">
+              <select
+                {...register("household", { setValueAs: (v) => v === "" ? null : Number(v) })}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="">No household</option>
+                {households?.results.map((h: Household) => (
+                  <option key={h.id} value={h.id}>{h.name}</option>
+                ))}
+              </select>
             </FormField>
             <div className="col-span-3">
               <FormField label="Address">

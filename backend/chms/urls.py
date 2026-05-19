@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/v1/", include("apps.groups.urls")),
     path("api/v1/", include("apps.communications.urls")),
     path("api/v1/dashboard/summary/", dashboard_summary, name="dashboard-summary"),
+    path("api/v1/", include("apps.core.urls")),
     # OpenAPI schema + docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

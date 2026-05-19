@@ -4,13 +4,15 @@ from .models import Household, Member, BranchMembership, DiscipleshipRecord
 
 
 class HouseholdSerializer(serializers.ModelSerializer):
+    member_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Household
         fields = [
             "id", "name", "address", "phone", "branch",
-            "created_at", "updated_at",
+            "member_count", "created_at", "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        read_only_fields = ["id", "member_count", "created_at", "updated_at"]
 
 
 class HouseholdSummarySerializer(serializers.ModelSerializer):

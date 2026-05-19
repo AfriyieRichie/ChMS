@@ -45,7 +45,7 @@ export interface PaginatedResponse<T> {
 
 export async function getMembers(
   branchId: number,
-  params?: { search?: string; status?: string; page?: number }
+  params?: { search?: string; status?: string; page?: number; household?: number }
 ): Promise<PaginatedResponse<Member>> {
   const { data } = await api.get("/api/v1/members/", {
     headers: { "X-Branch-Id": String(branchId) },

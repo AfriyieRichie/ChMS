@@ -26,7 +26,7 @@ export const fundSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   code: z.string().max(20).optional(),
   description: z.string().optional(),
-  is_designated: z.boolean().default(false),
+  is_designated: z.boolean(),
 });
 
 export type FundFormValues = z.infer<typeof fundSchema>;

@@ -5,10 +5,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Plus, X } from "lucide-react";
 import { getHouseholds, createHousehold, updateHousehold, type Household } from "@/lib/api/households";
 import { getMembers, type Member } from "@/lib/api/members";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 const BRANCH_ID = 1;
+const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white";
 
 const householdSchema = z.object({
   name: z.string().min(1, "Name is required").max(255),
@@ -16,6 +21,11 @@ const householdSchema = z.object({
   address: z.string().optional(),
 });
 type HouseholdFormValues = z.infer<typeof householdSchema>;
+
+const STATUS_VARIANT: Record<string, "success" | "info" | "default"> = {
+  member: "success",
+  regular: "info",
+};
 
 export default function HouseholdsPage() {
   const queryClient = useQueryClient();
@@ -54,8 +64,7 @@ export default function HouseholdsPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (d: HouseholdFormValues) =>
-      updateHousehold(selected!.id, d, BRANCH_ID),
+    mutationFn: (d: HouseholdFormValues) => updateHousehold(selected!.id, d, BRANCH_ID),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ["households", BRANCH_ID] });
       setSelected(updated);
@@ -72,43 +81,37 @@ export default function HouseholdsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Households</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Family groupings linked to members</p>
-        </div>
-        <button onClick={() => { setShowForm((v) => !v); setSelected(null); }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+      <PageHeader title="Households" description="Family groupings linked to members.">
+        <Button size="sm" onClick={() => { setShowForm((v) => !v); setSelected(null); }}>
+          {showForm ? <X size={14} /> : <Plus size={14} />}
           {showForm ? "Cancel" : "Add Household"}
-        </button>
-      </div>
+        </Button>
+      </PageHeader>
 
       {showForm && (
         <form onSubmit={handleCreate((d) => createMutation.mutate(d))}
           className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4">
-          <h2 className="font-semibold text-gray-800">New Household</h2>
+          <h2 className="font-semibold text-gray-900 text-sm">New Household</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1">
               <label className="text-xs font-medium text-gray-600">Household Name *</label>
-              <input type="text" {...regCreate("name")} placeholder="e.g. Mensah Family"
-                className="w-full border rounded-lg px-3 py-2 text-sm" />
+              <input type="text" {...regCreate("name")} placeholder="e.g. Mensah Family" className={FIELD} />
               {createErrors.name && <p className="text-xs text-red-500">{createErrors.name.message}</p>}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Phone</label>
-              <input type="tel" {...regCreate("phone")} className="w-full border rounded-lg px-3 py-2 text-sm" />
+              <input type="tel" {...regCreate("phone")} className={FIELD} />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Address</label>
-              <input type="text" {...regCreate("address")} className="w-full border rounded-lg px-3 py-2 text-sm" />
+              <input type="text" {...regCreate("address")} className={FIELD} />
             </div>
           </div>
-          <div className="flex gap-3">
-            <button type="submit" disabled={createMutation.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+          <div className="flex items-center gap-3">
+            <Button type="submit" size="sm" disabled={createMutation.isPending}>
               {createMutation.isPending ? "Creating…" : "Create"}
-            </button>
-            {createMutation.isError && <p className="text-red-500 text-sm self-center">Failed to create.</p>}
+            </Button>
+            {createMutation.isError && <p className="text-red-500 text-sm">Failed to create.</p>}
           </div>
         </form>
       )}
@@ -116,42 +119,44 @@ export default function HouseholdsPage() {
       <div className="flex gap-3">
         <input type="search" placeholder="Search households…" value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* List */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-          {isLoading && <div className="p-8 text-center text-gray-400">Loading…</div>}
+          {isLoading && <div className="p-8 text-center text-gray-400 text-sm">Loading…</div>}
           {!isLoading && data?.results.length === 0 && (
-            <div className="p-8 text-center text-gray-400">No households found.</div>
+            <div className="p-8 text-center text-gray-400 text-sm">No households found.</div>
           )}
           <div className="divide-y divide-gray-100">
             {data?.results.map((hh: Household) => (
               <div key={hh.id}
                 className={`px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors ${selected?.id === hh.id ? "bg-blue-50" : ""}`}
                 onClick={() => openDetail(hh)}>
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{hh.name}</p>
                     {hh.address && <p className="text-xs text-gray-400 mt-0.5">{hh.address}</p>}
                     {hh.phone && <p className="text-xs text-gray-400">{hh.phone}</p>}
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">
+                  <Badge variant="default">
                     {hh.member_count} {hh.member_count === 1 ? "member" : "members"}
-                  </span>
+                  </Badge>
                 </div>
               </div>
             ))}
           </div>
           {data && data.count > 0 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t text-sm text-gray-600">
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-600">
               <span>{data.count} total</span>
               <div className="flex gap-2">
-                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={!data.previous}
-                  className="px-3 py-1 border rounded disabled:opacity-40">Previous</button>
-                <button onClick={() => setPage((p) => p + 1)} disabled={!data.next}
-                  className="px-3 py-1 border rounded disabled:opacity-40">Next</button>
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={!data.previous}>
+                  Previous
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={!data.next}>
+                  Next
+                </Button>
               </div>
             </div>
           )}
@@ -167,8 +172,9 @@ export default function HouseholdsPage() {
                   className="text-xs text-blue-600 hover:text-blue-800">
                   {editing ? "Cancel" : "Edit"}
                 </button>
-                <button onClick={() => setSelected(null)} className="text-xs text-gray-400 hover:text-gray-600">
-                  Close
+                <button onClick={() => setSelected(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors">
+                  <X size={15} />
                 </button>
               </div>
             </div>
@@ -177,33 +183,36 @@ export default function HouseholdsPage() {
               <form onSubmit={handleEdit((d) => updateMutation.mutate(d))} className="px-5 py-4 space-y-3">
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-gray-600">Name *</label>
-                  <input type="text" {...regEdit("name")} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                  <input type="text" {...regEdit("name")} className={FIELD} />
                   {editErrors.name && <p className="text-xs text-red-500">{editErrors.name.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-gray-600">Phone</label>
-                  <input type="tel" {...regEdit("phone")} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                  <input type="tel" {...regEdit("phone")} className={FIELD} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-gray-600">Address</label>
-                  <input type="text" {...regEdit("address")} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                  <input type="text" {...regEdit("address")} className={FIELD} />
                 </div>
-                <div className="flex gap-3 pt-1">
-                  <button type="submit" disabled={updateMutation.isPending}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+                <div className="flex items-center gap-3 pt-1">
+                  <Button type="submit" size="sm" disabled={updateMutation.isPending}>
                     {updateMutation.isPending ? "Saving…" : "Save"}
-                  </button>
-                  {updateMutation.isError && <p className="text-red-500 text-sm self-center">Failed to save.</p>}
+                  </Button>
+                  {updateMutation.isError && <p className="text-red-500 text-sm">Failed to save.</p>}
                 </div>
               </form>
             ) : (
               <div className="px-5 py-4 space-y-4">
                 <div className="space-y-1">
                   {selected.phone && (
-                    <p className="text-sm text-gray-600"><span className="text-xs text-gray-400 mr-2">Phone</span>{selected.phone}</p>
+                    <p className="text-sm text-gray-600">
+                      <span className="text-xs text-gray-400 mr-2">Phone</span>{selected.phone}
+                    </p>
                   )}
                   {selected.address && (
-                    <p className="text-sm text-gray-600"><span className="text-xs text-gray-400 mr-2">Address</span>{selected.address}</p>
+                    <p className="text-sm text-gray-600">
+                      <span className="text-xs text-gray-400 mr-2">Address</span>{selected.address}
+                    </p>
                   )}
                 </div>
                 <div>
@@ -218,11 +227,9 @@ export default function HouseholdsPage() {
                     {householdMembersData?.results.map((m: Member) => (
                       <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
                         <span className="text-sm text-gray-800">{m.full_name}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          m.membership_status === "member" ? "bg-green-100 text-green-700" :
-                          m.membership_status === "regular" ? "bg-blue-100 text-blue-700" :
-                          "bg-gray-100 text-gray-500"
-                        }`}>{m.membership_status}</span>
+                        <Badge variant={STATUS_VARIANT[m.membership_status] ?? "default"}>
+                          {m.membership_status}
+                        </Badge>
                       </div>
                     ))}
                   </div>

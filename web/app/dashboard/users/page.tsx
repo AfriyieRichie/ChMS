@@ -5,12 +5,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Plus, X } from "lucide-react";
 import {
   getUsers, createUser, getRoles, assignRole, removeRole, deactivateUser,
   type User, type Role,
 } from "@/lib/api/users";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 const BRANCH_ID = 1;
+const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white";
 
 const createSchema = z.object({
   full_name: z.string().min(1, "Name is required"),
@@ -74,52 +79,43 @@ export default function UsersPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Users</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Manage staff accounts and role assignments</p>
-        </div>
-        <button onClick={() => setShowForm((v) => !v)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+      <PageHeader title="Users" description="Manage staff accounts and role assignments.">
+        <Button size="sm" onClick={() => setShowForm((v) => !v)}>
+          {showForm ? <X size={14} /> : <Plus size={14} />}
           {showForm ? "Cancel" : "Add User"}
-        </button>
-      </div>
+        </Button>
+      </PageHeader>
 
       {showForm && (
         <form onSubmit={handleSubmit((d) => createMutation.mutate(d))}
           className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4">
-          <h2 className="font-semibold text-gray-800">New User Account</h2>
+          <h2 className="font-semibold text-gray-900 text-sm">New User Account</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Full Name *</label>
-              <input type="text" {...register("full_name")}
-                className="w-full border rounded-lg px-3 py-2 text-sm" />
+              <input type="text" {...register("full_name")} className={FIELD} />
               {errors.full_name && <p className="text-xs text-red-500">{errors.full_name.message}</p>}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Email *</label>
-              <input type="email" {...register("email")}
-                className="w-full border rounded-lg px-3 py-2 text-sm" />
+              <input type="email" {...register("email")} className={FIELD} />
               {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Phone</label>
-              <input type="tel" {...register("phone")}
-                className="w-full border rounded-lg px-3 py-2 text-sm" />
+              <input type="tel" {...register("phone")} className={FIELD} />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Password *</label>
-              <input type="password" {...register("password")}
-                className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Min. 8 characters" />
+              <input type="password" {...register("password")} placeholder="Min. 8 characters" className={FIELD} />
               {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
             </div>
           </div>
-          <div className="flex gap-3">
-            <button type="submit" disabled={createMutation.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-              {createMutation.isPending ? "Creating..." : "Create User"}
-            </button>
-            {createMutation.isError && <p className="text-red-500 text-sm self-center">Failed to create user.</p>}
+          <div className="flex items-center gap-3">
+            <Button type="submit" size="sm" disabled={createMutation.isPending}>
+              {createMutation.isPending ? "Creating…" : "Create User"}
+            </Button>
+            {createMutation.isError && <p className="text-red-500 text-sm">Failed to create user.</p>}
           </div>
         </form>
       )}
@@ -127,27 +123,25 @@ export default function UsersPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         {/* User list */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-          {isLoading && <div className="p-8 text-center text-gray-400">Loading users...</div>}
+          {isLoading && <div className="p-8 text-center text-gray-400 text-sm">Loading users…</div>}
           {!isLoading && (!users || users.length === 0) && (
-            <div className="p-8 text-center text-gray-400">No users found.</div>
+            <div className="p-8 text-center text-gray-400 text-sm">No users found.</div>
           )}
           <div className="divide-y divide-gray-100">
             {users?.map((u: User) => (
               <div key={u.id}
                 className={`px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors ${selectedUser?.id === u.id ? "bg-blue-50" : ""}`}
                 onClick={() => setSelectedUser(selectedUser?.id === u.id ? null : u)}>
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{u.full_name}</p>
-                    <p className="text-xs text-gray-400">{u.email}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{u.email}</p>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    {u.is_network_admin && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">Admin</span>
-                    )}
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {u.is_network_admin && <Badge variant="purple">Admin</Badge>}
+                    <Badge variant={u.is_active ? "success" : "default"}>
                       {u.is_active ? "Active" : "Inactive"}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
                 {u.role_assignments.length > 0 && (
@@ -170,12 +164,15 @@ export default function UsersPage() {
             <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
               <div>
                 <p className="font-semibold text-gray-900 text-sm">{selectedUser.full_name}</p>
-                <p className="text-xs text-gray-400">{selectedUser.email}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{selectedUser.email}</p>
               </div>
-              <button onClick={() => setSelectedUser(null)} className="text-xs text-gray-400 hover:text-gray-600">Close</button>
+              <button onClick={() => setSelectedUser(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={16} />
+              </button>
             </div>
 
-            <div className="px-5 py-4 space-y-4">
+            <div className="px-5 py-4 space-y-5">
               <div>
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Current Roles</h3>
                 {selectedUser.role_assignments.length === 0 && (
@@ -191,7 +188,7 @@ export default function UsersPage() {
                       <button
                         onClick={() => removeMutation.mutate({ userId: selectedUser.id, assignmentId: ra.id })}
                         disabled={removeMutation.isPending}
-                        className="text-xs text-red-400 hover:text-red-600 px-2">
+                        className="text-xs text-red-400 hover:text-red-600 transition-colors px-2">
                         Remove
                       </button>
                     </div>
@@ -203,26 +200,27 @@ export default function UsersPage() {
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Assign Role</h3>
                 <div className="flex gap-2">
                   <select value={assignRoleId} onChange={(e) => setAssignRoleId(e.target.value)}
-                    className="flex-1 border rounded-lg px-3 py-2 text-sm">
-                    <option value="">Select role...</option>
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white">
+                    <option value="">Select role…</option>
                     {roles?.map((r: Role) => (
                       <option key={r.id} value={r.id}>{r.name}</option>
                     ))}
                   </select>
-                  <button
+                  <Button
+                    size="sm"
                     disabled={!assignRoleId || assignMutation.isPending}
                     onClick={() => assignMutation.mutate({ userId: selectedUser.id, roleId: Number(assignRoleId) })}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+                  >
                     Assign
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               {selectedUser.is_active && !selectedUser.is_network_admin && (
-                <div className="pt-2 border-t border-gray-100">
+                <div className="pt-3 border-t border-gray-100">
                   <button
                     onClick={() => { if (confirm(`Deactivate ${selectedUser.full_name}?`)) deactivateMutation.mutate(selectedUser.id); }}
-                    className="text-xs text-red-500 hover:text-red-700">
+                    className="text-xs text-red-400 hover:text-red-600 transition-colors">
                     Deactivate this user
                   </button>
                 </div>

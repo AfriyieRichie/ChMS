@@ -157,11 +157,34 @@ export async function getContributionSummary(
   return data;
 }
 
+export async function updateFund(id: number, payload: Partial<Fund>, branchId: number): Promise<Fund> {
+  const { data } = await api.patch(`/api/v1/finance/funds/${id}/`, payload, { headers: h(branchId) });
+  return data;
+}
+
+export async function createGivingCategory(
+  payload: { name: string; description?: string },
+  branchId: number,
+): Promise<GivingCategory> {
+  const { data } = await api.post("/api/v1/finance/categories/", { ...payload, branch: branchId }, { headers: h(branchId) });
+  return data;
+}
+
 export async function getPledges(
   branchId: number,
   params?: { status?: string; member?: number; fund?: number; page?: number }
 ): Promise<PaginatedResponse<Pledge>> {
   const { data } = await api.get("/api/v1/finance/pledges/", { headers: h(branchId), params });
+  return data;
+}
+
+export async function createPledge(payload: Partial<Pledge>, branchId: number): Promise<Pledge> {
+  const { data } = await api.post("/api/v1/finance/pledges/", payload, { headers: h(branchId) });
+  return data;
+}
+
+export async function updatePledge(id: number, payload: Partial<Pledge>, branchId: number): Promise<Pledge> {
+  const { data } = await api.patch(`/api/v1/finance/pledges/${id}/`, payload, { headers: h(branchId) });
   return data;
 }
 

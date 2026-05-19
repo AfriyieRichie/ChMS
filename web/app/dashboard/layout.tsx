@@ -12,6 +12,7 @@ const NAV = [
   { href: "/dashboard/events", label: "Events", icon: "📅" },
   { href: "/dashboard/groups", label: "Groups", icon: "🫂" },
   { href: "/dashboard/communications", label: "Comms", icon: "📣" },
+  { href: "/dashboard/reports", label: "Reports", icon: "📊" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

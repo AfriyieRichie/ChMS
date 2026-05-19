@@ -81,3 +81,30 @@ export async function updateMember(
   });
   return data;
 }
+
+export interface DiscipleshipRecord {
+  id: number;
+  member: number;
+  branch: number;
+  stage: string;
+  status: "in_progress" | "completed" | "dropped";
+  started_at: string;
+  completed_at: string | null;
+  facilitator: number | null;
+  facilitator_name: string;
+  notes: string;
+}
+
+export async function getMemberDiscipleship(id: number, branchId: number): Promise<DiscipleshipRecord[]> {
+  const { data } = await api.get(`/api/v1/members/${id}/discipleship/`, {
+    headers: { "X-Branch-Id": String(branchId) },
+  });
+  return data;
+}
+
+export async function getMemberGroups(id: number, branchId: number) {
+  const { data } = await api.get(`/api/v1/members/${id}/groups/`, {
+    headers: { "X-Branch-Id": String(branchId) },
+  });
+  return data;
+}

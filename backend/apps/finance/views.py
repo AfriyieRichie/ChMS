@@ -1,4 +1,6 @@
+from datetime import date
 from django.db.models import Sum, Count, Q
+from django.db.models.functions import TruncMonth
 from django.utils import timezone
 
 from rest_framework import status
@@ -137,7 +139,7 @@ class ContributionViewSet(BranchScopedViewSet):
         return ContributionSerializer
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve", "summary"):
+        if self.action in ("list", "retrieve", "summary", "monthly"):
             return [CanViewFinance()]
         if self.action == "reverse":
             return [CanRecordFinance()]
@@ -223,6 +225,27 @@ class ContributionViewSet(BranchScopedViewSet):
             request=request,
         )
         return Response(ContributionSerializer(reversal, context={"request": request}).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["get"])
+    def monthly(self, request):
+        """Total giving per month for the last N months (default 6)."""
+        months = max(1, min(24, int(request.query_params.get("months", 6))))
+        today = date.today()
+        start_month = today.month - months + 1
+        start_year = today.year
+        while start_month <= 0:
+            start_month += 12
+            start_year -= 1
+        start = date(start_year, start_month, 1)
+
+        qs = self.get_queryset().filter(is_reversal=False, given_at__gte=start)
+        by_month = (
+            qs.annotate(month=TruncMonth("given_at"))
+            .values("month")
+            .annotate(total=Sum("amount"), count=Count("id"))
+            .order_by("month")
+        )
+        return Response(list(by_month))
 
     @action(detail=False, methods=["get"])
     def summary(self, request):

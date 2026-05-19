@@ -103,9 +103,20 @@ export async function getGivingCategories(branchId: number): Promise<GivingCateg
   return Array.isArray(data) ? data : data.results ?? [];
 }
 
+export async function getMonthlyContributions(
+  branchId: number,
+  months = 6
+): Promise<{ month: string; total: string; count: number }[]> {
+  const { data } = await api.get("/api/v1/finance/contributions/monthly/", {
+    headers: h(branchId),
+    params: { months },
+  });
+  return data;
+}
+
 export async function getContributions(
   branchId: number,
-  params?: { fund?: number; date_from?: string; date_to?: string; page?: number; exclude_reversals?: boolean }
+  params?: { fund?: number; member?: number; date_from?: string; date_to?: string; page?: number; exclude_reversals?: boolean }
 ): Promise<PaginatedResponse<Contribution>> {
   const { data } = await api.get("/api/v1/finance/contributions/", {
     headers: h(branchId),

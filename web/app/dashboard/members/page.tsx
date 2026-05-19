@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getMembers, type Member } from "@/lib/api/members";
 
@@ -91,8 +92,10 @@ export default function MembersPage() {
                   </tr>
                 )}
                 {data?.results.map((m: Member) => (
-                  <tr key={m.id} className="hover:bg-gray-50 cursor-pointer">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{m.full_name}</td>
+                  <tr key={m.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-blue-700">
+                      <Link href={`/dashboard/members/${m.id}`} className="hover:underline">{m.full_name}</Link>
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-600">{m.phone || "—"}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{m.email || "—"}</td>
                     <td className="px-4 py-3">

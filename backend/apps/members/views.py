@@ -8,12 +8,13 @@ from apps.accounts.permissions import make_capability_permission
 from apps.core.audit import log_action, AuditLog
 from apps.core.viewsets import BranchScopedViewSet
 
-from .models import Household, Member, BranchMembership
+from .models import Household, Member, BranchMembership, DiscipleshipRecord
 from .serializers import (
     HouseholdSerializer,
     MemberSerializer,
     MemberListSerializer,
     BranchMembershipSerializer,
+    DiscipleshipRecordSerializer,
 )
 
 CanViewMembers = make_capability_permission("members.view")
@@ -96,6 +97,27 @@ class MemberViewSet(BranchScopedViewSet):
         instance.deleted_at = timezone.now()
         instance.save(update_fields=["deleted_at"])
         log_action(self.request.user, AuditLog.Action.DELETE, instance, request=self.request)
+
+    @action(detail=True, methods=["get", "post"], url_path="discipleship")
+    def discipleship(self, request, pk=None):
+        member = self.get_object()
+        if request.method == "GET":
+            qs = member.discipleship_records.order_by("stage")
+            return Response(DiscipleshipRecordSerializer(qs, many=True).data)
+
+        serializer = DiscipleshipRecordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        branch = getattr(request, "branch", None)
+        serializer.save(member=member, branch=branch)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["get"], url_path="groups")
+    def groups(self, request, pk=None):
+        member = self.get_object()
+        from apps.groups.models import GroupMembership
+        from apps.groups.serializers import GroupMembershipSerializer
+        qs = GroupMembership.objects.filter(member=member, left_at__isnull=True).select_related("group")
+        return Response(GroupMembershipSerializer(qs, many=True).data)
 
     @action(detail=True, methods=["get", "post"], url_path="branch-memberships")
     def branch_memberships(self, request, pk=None):

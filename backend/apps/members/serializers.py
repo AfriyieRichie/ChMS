@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Household, Member, BranchMembership
+from .models import Household, Member, BranchMembership, DiscipleshipRecord
 
 
 class HouseholdSerializer(serializers.ModelSerializer):
@@ -57,6 +57,20 @@ class MemberSerializer(serializers.ModelSerializer):
         if request and request.user.has_perm("members.view_sensitive"):
             data["sensitive_notes"] = instance.sensitive_notes
         return data
+
+
+class DiscipleshipRecordSerializer(serializers.ModelSerializer):
+    facilitator_name = serializers.CharField(source="facilitator.full_name", read_only=True)
+
+    class Meta:
+        model = DiscipleshipRecord
+        fields = [
+            "id", "member", "branch", "stage", "status",
+            "started_at", "completed_at",
+            "facilitator", "facilitator_name", "notes",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
 
 class MemberListSerializer(serializers.ModelSerializer):

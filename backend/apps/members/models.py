@@ -24,6 +24,26 @@ class Household(TimeStampedModel):
         return self.name
 
 
+class MemberTag(TimeStampedModel):
+    branch = models.ForeignKey(
+        "branches.Branch",
+        on_delete=models.CASCADE,
+        related_name="member_tags",
+        verbose_name=_("branch"),
+    )
+    name = models.CharField(_("name"), max_length=50)
+    color = models.CharField(_("color"), max_length=7, default="#6B7280")
+
+    class Meta:
+        verbose_name = _("member tag")
+        verbose_name_plural = _("member tags")
+        unique_together = [("branch", "name")]
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Member(TimeStampedModel):
     class Gender(models.TextChoices):
         MALE = "male", _("Male")
@@ -41,13 +61,14 @@ class Member(TimeStampedModel):
         REGULAR = "regular", _("Regular Attendee")
         MEMBER = "member", _("Member")
         INACTIVE = "inactive", _("Inactive")
+        TRANSFERRED = "transferred", _("Transferred")
+        DECEASED = "deceased", _("Deceased")
 
     class BaptismStatus(models.TextChoices):
         NOT_BAPTISED = "not_baptised", _("Not Baptised")
         BAPTISED = "baptised", _("Baptised")
         PENDING = "pending", _("Pending")
 
-    # Optional link to a system user account
     user = models.OneToOneField(
         "accounts.User",
         null=True,
@@ -63,6 +84,12 @@ class Member(TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="members",
         verbose_name=_("household"),
+    )
+    tags = models.ManyToManyField(
+        MemberTag,
+        blank=True,
+        related_name="members",
+        verbose_name=_("tags"),
     )
 
     first_name = models.CharField(_("first name"), max_length=100)
@@ -93,7 +120,6 @@ class Member(TimeStampedModel):
     baptism_date = models.DateField(_("baptism date"), null=True, blank=True)
 
     notes = models.TextField(_("notes"), blank=True)
-    # Sensitive notes — visible only to users with members.view_sensitive
     sensitive_notes = models.TextField(_("sensitive notes"), blank=True)
 
     class Meta:

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Household, Member, BranchMembership, DiscipleshipRecord
+from .models import Household, Member, MemberTag, BranchMembership, DiscipleshipRecord
 
 
 class HouseholdSerializer(serializers.ModelSerializer):
@@ -21,6 +21,24 @@ class HouseholdSummarySerializer(serializers.ModelSerializer):
         fields = ["id", "name"]
 
 
+class MemberTagSerializer(serializers.ModelSerializer):
+    member_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MemberTag
+        fields = ["id", "name", "color", "branch", "member_count", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+    def get_member_count(self, obj):
+        return obj.members.filter(deleted_at__isnull=True).count()
+
+
+class MemberTagSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MemberTag
+        fields = ["id", "name", "color"]
+
+
 class BranchMembershipSerializer(serializers.ModelSerializer):
     branch_name = serializers.CharField(source="branch.name", read_only=True)
 
@@ -37,6 +55,10 @@ class MemberSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(read_only=True)
     branch_memberships = BranchMembershipSerializer(many=True, read_only=True)
     household_name = serializers.CharField(source="household.name", read_only=True)
+    tags = MemberTagSummarySerializer(many=True, read_only=True)
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        source="tags", many=True, queryset=MemberTag.objects.all(), write_only=True, required=False,
+    )
 
     class Meta:
         model = Member
@@ -48,6 +70,7 @@ class MemberSerializer(serializers.ModelSerializer):
             "baptism_status", "baptism_date",
             "household", "household_name",
             "notes",
+            "tags", "tag_ids",
             "branch_memberships",
             "created_at", "updated_at",
         ]
@@ -59,6 +82,13 @@ class MemberSerializer(serializers.ModelSerializer):
         if request and request.user.has_perm("members.view_sensitive"):
             data["sensitive_notes"] = instance.sensitive_notes
         return data
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop("tags", None)
+        instance = super().update(instance, validated_data)
+        if tags is not None:
+            instance.tags.set(tags)
+        return instance
 
 
 class DiscipleshipRecordSerializer(serializers.ModelSerializer):
@@ -78,12 +108,14 @@ class DiscipleshipRecordSerializer(serializers.ModelSerializer):
 class MemberListSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(read_only=True)
     primary_branch = serializers.SerializerMethodField()
+    tags = MemberTagSummarySerializer(many=True, read_only=True)
 
     class Meta:
         model = Member
         fields = [
             "id", "full_name", "gender", "phone", "email",
-            "membership_status", "primary_branch",
+            "membership_status", "baptism_status", "date_of_birth",
+            "date_joined", "primary_branch", "tags",
         ]
 
     def get_primary_branch(self, obj):

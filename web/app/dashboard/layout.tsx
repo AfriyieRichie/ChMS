@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { setAccessToken } from "@/lib/api";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: "⊞" },
@@ -13,6 +14,7 @@ const NAV = [
   { href: "/dashboard/groups", label: "Groups", icon: "🫂" },
   { href: "/dashboard/communications", label: "Comms", icon: "📣" },
   { href: "/dashboard/reports", label: "Reports", icon: "📊" },
+  { href: "/dashboard/users", label: "Users", icon: "👤" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -47,9 +49,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
         <div className="p-4 border-t border-gray-200">
-          <Link href="/login" className="text-xs text-gray-500 hover:text-gray-700">
+          <button
+            onClick={() => { setAccessToken(null); window.location.href = "/login"; }}
+            className="text-xs text-gray-500 hover:text-gray-700"
+          >
             Sign out
-          </Link>
+          </button>
         </div>
       </aside>
 

@@ -2,8 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { getMembers, type Member } from "@/lib/api/members";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { getMembers, createMember, type Member } from "@/lib/api/members";
+
+const addMemberSchema = z.object({
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  gender: z.enum(["male", "female", "other"]),
+  phone: z.string().optional(),
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  membership_status: z.enum(["visitor", "regular", "member"]),
+});
+type AddMemberValues = z.infer<typeof addMemberSchema>;
 
 const BRANCH_ID = 1; // TODO: read from auth context / cookie
 
@@ -22,9 +35,11 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function MembersPage() {
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
+  const [showForm, setShowForm] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["members", BRANCH_ID, search, statusFilter, page],
@@ -37,14 +52,91 @@ export default function MembersPage() {
     placeholderData: (prev) => prev,
   });
 
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<AddMemberValues>({
+    resolver: zodResolver(addMemberSchema),
+    defaultValues: { gender: "male", membership_status: "visitor" },
+  });
+
+  const addMutation = useMutation({
+    mutationFn: (d: AddMemberValues) =>
+      createMember({ ...d, full_name: `${d.first_name} ${d.last_name}`, email: d.email || undefined }, BRANCH_ID),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["members", BRANCH_ID] });
+      setShowForm(false);
+      reset();
+    },
+  });
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Members</h1>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-          Add Member
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+        >
+          {showForm ? "Cancel" : "Add Member"}
         </button>
       </div>
+
+      {showForm && (
+        <form
+          onSubmit={handleSubmit((d) => addMutation.mutate(d))}
+          className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4"
+        >
+          <h2 className="font-semibold text-gray-800">New Member</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">First Name *</label>
+              <input type="text" {...register("first_name")}
+                className="w-full border rounded-lg px-3 py-2 text-sm" />
+              {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">Last Name *</label>
+              <input type="text" {...register("last_name")}
+                className="w-full border rounded-lg px-3 py-2 text-sm" />
+              {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">Gender *</label>
+              <select {...register("gender")} className="w-full border rounded-lg px-3 py-2 text-sm">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">Status *</label>
+              <select {...register("membership_status")} className="w-full border rounded-lg px-3 py-2 text-sm">
+                <option value="visitor">Visitor</option>
+                <option value="regular">Regular</option>
+                <option value="member">Member</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">Phone</label>
+              <input type="tel" {...register("phone")}
+                className="w-full border rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">Email</label>
+              <input type="email" {...register("email")}
+                className="w-full border rounded-lg px-3 py-2 text-sm" />
+              {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button type="submit" disabled={addMutation.isPending}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+              {addMutation.isPending ? "Saving..." : "Save Member"}
+            </button>
+            {addMutation.isError && (
+              <p className="text-red-500 text-sm self-center">Failed to create member.</p>
+            )}
+          </div>
+        </form>
+      )}
 
       {/* Filters */}
       <div className="flex gap-3">

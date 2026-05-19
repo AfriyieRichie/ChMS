@@ -6,11 +6,19 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Attach the in-memory access token to every request.
-let accessToken: string | null = null;
+// In-memory access token — persisted to localStorage for page reloads.
+let accessToken: string | null =
+  typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
+  if (typeof window !== "undefined") {
+    if (token) {
+      localStorage.setItem("access_token", token);
+    } else {
+      localStorage.removeItem("access_token");
+    }
+  }
 }
 
 api.interceptors.request.use((config) => {

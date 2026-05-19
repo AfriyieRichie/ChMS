@@ -1,6 +1,5 @@
 "use client";
 
-import type { Metadata } from "next";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { setAccessToken } from "@/lib/api";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/auth";
 
 export default function LoginPage() {
@@ -45,9 +45,8 @@ export default function LoginPage() {
         setServerError(body.detail ?? "Invalid email or password.");
         return;
       }
-      // Store access token in memory via a cookie the middleware can read.
-      // Full auth wiring happens in Phase 1 RBAC work.
-      document.cookie = "auth_token=placeholder; path=/; SameSite=Lax";
+      const { access } = await res.json();
+      setAccessToken(access);
       window.location.href = "/dashboard";
     } catch {
       setServerError("Unable to reach the server. Please try again.");

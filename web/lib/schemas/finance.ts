@@ -13,7 +13,7 @@ export const contributionSchema = z.object({
     (v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0,
     "Amount must be greater than zero"
   ),
-  currency: z.string().default("GHS"),
+  currency: z.string(),
   given_at: z.string().min(1, "Date is required"),
   payment_method: z.enum(["cash", "cheque", "bank_transfer", "mobile_money", "card"]),
   reference: z.string().max(100).optional(),
@@ -39,7 +39,7 @@ export const pledgeSchema = z.object({
     (v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0,
     "Must be positive"
   ),
-  currency: z.string().default("GHS"),
+  currency: z.string(),
   start_date: z.string().min(1, "Start date required"),
   end_date: z.string().nullable().optional(),
   frequency: z.enum(["one_time", "weekly", "biweekly", "monthly", "quarterly", "annual"]),

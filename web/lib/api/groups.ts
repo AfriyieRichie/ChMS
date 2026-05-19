@@ -1,5 +1,7 @@
 import api from "@/lib/api";
 
+const h = (branchId: number) => ({ "X-Branch-Id": String(branchId) });
+
 export interface Group {
   id: number;
   branch: number;
@@ -34,54 +36,51 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
-const headers = (branchId: number) => ({ "X-Branch-Id": String(branchId) });
-
 export async function getGroups(
   branchId: number,
-  params?: { group_type?: string; active_only?: string; page?: number }
+  params?: { group_type?: string; active_only?: string; page?: number },
 ): Promise<PaginatedResponse<Group>> {
-  const { data } = await api.get("/api/v1/groups/", { headers: headers(branchId), params });
+  const { data } = await api.get("/api/v1/groups/", { headers: h(branchId), params });
   return data;
 }
 
-export async function createGroup(
-  payload: Partial<Group>,
-  branchId: number
-): Promise<Group> {
-  const { data } = await api.post("/api/v1/groups/", payload, { headers: headers(branchId) });
+export async function createGroup(payload: Partial<Group>, branchId: number): Promise<Group> {
+  const { data } = await api.post("/api/v1/groups/", payload, { headers: h(branchId) });
   return data;
 }
 
-export async function getGroupMembers(
-  groupId: number,
-  branchId: number
-): Promise<GroupMembership[]> {
-  const { data } = await api.get(`/api/v1/groups/${groupId}/members/`, {
-    headers: headers(branchId),
-  });
+export async function updateGroup(id: number, payload: Partial<Group>, branchId: number): Promise<Group> {
+  const { data } = await api.patch(`/api/v1/groups/${id}/`, payload, { headers: h(branchId) });
   return data;
+}
+
+export async function deleteGroup(id: number, branchId: number): Promise<void> {
+  await api.delete(`/api/v1/groups/${id}/`, { headers: h(branchId) });
+}
+
+export async function getGroupMembers(groupId: number, branchId: number): Promise<GroupMembership[]> {
+  const { data } = await api.get(`/api/v1/groups/${groupId}/members/`, { headers: h(branchId) });
+  return Array.isArray(data) ? data : data.results ?? [];
 }
 
 export async function addGroupMember(
   groupId: number,
   payload: { member: number; role?: string },
-  branchId: number
+  branchId: number,
 ): Promise<GroupMembership> {
-  const { data } = await api.post(`/api/v1/groups/${groupId}/members/`, payload, {
-    headers: headers(branchId),
-  });
+  const { data } = await api.post(`/api/v1/groups/${groupId}/members/`, payload, { headers: h(branchId) });
   return data;
 }
 
 export async function removeGroupMember(
   groupId: number,
   membershipId: number,
-  branchId: number
+  branchId: number,
 ): Promise<GroupMembership> {
   const { data } = await api.post(
     `/api/v1/groups/${groupId}/members/${membershipId}/remove/`,
     {},
-    { headers: headers(branchId) }
+    { headers: h(branchId) },
   );
   return data;
 }

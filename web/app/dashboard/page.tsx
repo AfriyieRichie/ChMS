@@ -1,47 +1,36 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
+const CARDS = [
+  { label: "Members", value: "—", href: "/dashboard/members", description: "View all members" },
+  { label: "Branches", value: "—", href: "/dashboard/branches", description: "Manage branches" },
+  { label: "Attendance", value: "—", href: "/dashboard/attendance", description: "Track attendance" },
+  { label: "Giving", value: "GHS —", href: "#", description: "Coming soon" },
+];
+
 export default function DashboardPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-muted/40">
-      {/* Top nav placeholder */}
-      <header className="border-b bg-background px-6 py-4 flex items-center justify-between">
-        <span className="font-semibold text-lg">
-          {process.env.NEXT_PUBLIC_APP_NAME ?? "ChMS"}
-        </span>
-        <nav className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>Branch switcher (coming Phase 1)</span>
-          <a href="/login" className="underline-offset-4 hover:underline">
-            Sign out
-          </a>
-        </nav>
-      </header>
+    <div className="p-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900">Overview</h1>
+        <p className="text-sm text-gray-500 mt-1">Welcome back. Here is a summary of your branch.</p>
+      </div>
 
-      <main className="flex-1 p-8 max-w-5xl mx-auto w-full">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Dashboard</h1>
-        <p className="text-muted-foreground mb-8">
-          Phase 1 in progress — RBAC, Branches, Members, and Attendance coming next.
-        </p>
-
-        {/* Placeholder stat cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { label: "Members", value: "—" },
-            { label: "Branches", value: "—" },
-            { label: "Attendance this week", value: "—" },
-            { label: "Giving this month", value: "GHS —" },
-          ].map(({ label, value }) => (
-            <div
-              key={label}
-              className="rounded-xl border bg-card p-6 text-card-foreground shadow-sm"
-            >
-              <p className="text-sm text-muted-foreground">{label}</p>
-              <p className="mt-1 text-2xl font-semibold">{value}</p>
-            </div>
-          ))}
-        </div>
-      </main>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {CARDS.map(({ label, value, href, description }) => (
+          <Link
+            key={label}
+            href={href}
+            className="block bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
+            <p className="mt-1 text-3xl font-bold text-gray-900">{value}</p>
+            <p className="mt-2 text-xs text-blue-600">{description} →</p>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

@@ -26,7 +26,7 @@ test:
 
 ## Load seed fixtures
 seed:
-	docker compose exec backend python manage.py loaddata initial_data
+	docker compose exec backend python manage.py loaddata apps/accounts/fixtures/initial_data.json
 
 ## Create a Django superuser interactively
 createsuperuser:

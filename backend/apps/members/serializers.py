@@ -111,6 +111,7 @@ class MemberListSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(read_only=True)
     primary_branch = serializers.SerializerMethodField()
     tags = MemberTagSummarySerializer(many=True, read_only=True)
+    last_attended = serializers.SerializerMethodField()
 
     class Meta:
         model = Member
@@ -119,11 +120,16 @@ class MemberListSerializer(serializers.ModelSerializer):
             "membership_status", "baptism_status", "date_of_birth",
             "date_joined", "primary_branch", "tags",
             "household", "household_name", "photo",
+            "last_attended",
         ]
 
     def get_primary_branch(self, obj):
         branch = obj.primary_branch
         return {"id": branch.pk, "name": branch.name} if branch else None
+
+    def get_last_attended(self, obj):
+        val = getattr(obj, "last_attended", None)
+        return str(val) if val else None
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

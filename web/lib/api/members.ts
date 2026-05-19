@@ -25,6 +25,10 @@ export interface Member {
   date_joined: string | null;
   primary_branch: { id: number; name: string } | null;
   tags: MemberTag[];
+  household: number | null;
+  household_name: string | null;
+  photo: string | null;
+  last_attended: string | null;
 }
 
 export interface MemberDetail extends Member {
@@ -104,6 +108,7 @@ export interface MemberFilters {
   group?: number;
   last_attended_from?: string;
   last_attended_to?: string;
+  not_attended_since?: string;
   tags?: number[];
   household?: number;
   page?: number;

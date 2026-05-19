@@ -2,6 +2,8 @@ import api from "@/lib/api";
 
 const h = (branchId: number) => ({ "X-Branch-Id": String(branchId) });
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 export interface ServiceType {
   id: number;
   name: string;
@@ -35,11 +37,48 @@ export interface AttendanceRecord {
   entries?: AttendanceEntry[];
 }
 
+export interface FirstTimeVisitor {
+  id: number;
+  attendance_record: number;
+  record_date: string;
+  record_service: string;
+  name: string;
+  phone: string;
+  email: string;
+  how_heard: string;
+  notes: string;
+  followed_up: boolean;
+  converted_to_member: number | null;
+  created_at: string;
+}
+
+export interface ChildCheckIn {
+  id: number;
+  attendance_record: number;
+  record_date: string;
+  child_name: string;
+  age: number | null;
+  parent_name: string;
+  parent_phone: string;
+  allergy_notes: string;
+  pickup_code: string;
+  member: number | null;
+  checked_out: boolean;
+  created_at: string;
+}
+
 export interface PaginatedResponse<T> {
   count: number;
   next: string | null;
   previous: string | null;
   results: T[];
+}
+
+export interface AttendanceFilters {
+  date_from?: string;
+  date_to?: string;
+  service_type?: number;
+  page?: number;
 }
 
 // ── Service Types ─────────────────────────────────────────────────────────────
@@ -75,13 +114,6 @@ export async function updateServiceType(
 }
 
 // ── Attendance Records ────────────────────────────────────────────────────────
-
-export interface AttendanceFilters {
-  date_from?: string;
-  date_to?: string;
-  service_type?: number;
-  page?: number;
-}
 
 export async function getAttendanceRecords(
   branchId: number,
@@ -133,11 +165,79 @@ export async function addAttendanceEntry(
   return data;
 }
 
+export async function removeAttendanceEntry(recordId: number, entryId: number, branchId: number): Promise<void> {
+  await api.delete(`/api/v1/attendance/${recordId}/entries/${entryId}/`, { headers: h(branchId) });
+}
+
 export async function bulkAddEntries(
   recordId: number,
   branchId: number,
   entries: Array<{ member: number; is_first_visit?: boolean }>,
 ): Promise<{ created: number }> {
   const { data } = await api.post(`/api/v1/attendance/${recordId}/bulk-entries/`, entries, { headers: h(branchId) });
+  return data;
+}
+
+// ── First-time Visitors ───────────────────────────────────────────────────────
+
+export async function getVisitors(recordId: number, branchId: number): Promise<FirstTimeVisitor[]> {
+  const { data } = await api.get("/api/v1/visitors/", {
+    headers: h(branchId),
+    params: { record: recordId },
+  });
+  return Array.isArray(data) ? data : data.results ?? [];
+}
+
+export async function createVisitor(
+  payload: Partial<FirstTimeVisitor>,
+  branchId: number,
+): Promise<FirstTimeVisitor> {
+  const { data } = await api.post("/api/v1/visitors/", payload, { headers: h(branchId) });
+  return data;
+}
+
+export async function updateVisitor(
+  id: number,
+  payload: Partial<FirstTimeVisitor>,
+  branchId: number,
+): Promise<FirstTimeVisitor> {
+  const { data } = await api.patch(`/api/v1/visitors/${id}/`, payload, { headers: h(branchId) });
+  return data;
+}
+
+// ── Children Check-in ─────────────────────────────────────────────────────────
+
+export async function getChildCheckIns(recordId: number, branchId: number): Promise<ChildCheckIn[]> {
+  const { data } = await api.get("/api/v1/children/", {
+    headers: h(branchId),
+    params: { record: recordId },
+  });
+  return Array.isArray(data) ? data : data.results ?? [];
+}
+
+export async function createChildCheckIn(
+  payload: Partial<ChildCheckIn>,
+  branchId: number,
+): Promise<ChildCheckIn> {
+  const { data } = await api.post("/api/v1/children/", payload, { headers: h(branchId) });
+  return data;
+}
+
+export async function updateChildCheckIn(
+  id: number,
+  payload: Partial<ChildCheckIn>,
+  branchId: number,
+): Promise<ChildCheckIn> {
+  const { data } = await api.patch(`/api/v1/children/${id}/`, payload, { headers: h(branchId) });
+  return data;
+}
+
+// ── Self Check-in ─────────────────────────────────────────────────────────────
+
+export async function selfCheckIn(
+  recordId: number,
+  phone: string,
+): Promise<{ checked_in: boolean; member_name: string; created: boolean; already_checked_in: boolean }> {
+  const { data } = await api.post(`/api/v1/attendance/${recordId}/self-checkin/`, { phone });
   return data;
 }

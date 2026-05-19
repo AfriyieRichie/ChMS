@@ -144,13 +144,16 @@ class MemberViewSet(BranchScopedViewSet):
                 group_memberships__left_at__isnull=True,
             )
 
-        # Last attendance date range — annotate then filter
-        if p.get("last_attended_from") or p.get("last_attended_to"):
+        # Last attendance date range / absence filter — annotate then filter
+        if p.get("last_attended_from") or p.get("last_attended_to") or p.get("not_attended_since"):
             qs = qs.annotate(last_attended=Max("attendance_entries__attendance_record__date"))
             if p.get("last_attended_from"):
                 qs = qs.filter(last_attended__gte=p["last_attended_from"])
             if p.get("last_attended_to"):
                 qs = qs.filter(last_attended__lte=p["last_attended_to"])
+            if p.get("not_attended_since"):
+                cutoff = p["not_attended_since"]
+                qs = qs.filter(Q(last_attended__isnull=True) | Q(last_attended__lt=cutoff))
 
         tag_ids = p.getlist("tags")
         for tag_id in tag_ids:

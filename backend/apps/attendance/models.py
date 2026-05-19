@@ -1,7 +1,14 @@
+import random
+import string
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import TimeStampedModel
+
+
+def _pickup_code():
+    return "".join(random.choices(string.digits, k=4))
 
 
 class ServiceType(TimeStampedModel):
@@ -99,3 +106,79 @@ class AttendanceEntry(TimeStampedModel):
 
     def __str__(self):
         return f"{self.member} @ {self.attendance_record}"
+
+
+HOW_HEARD_CHOICES = [
+    ("friend", "Friend / Family"),
+    ("social_media", "Social Media"),
+    ("flyer", "Flyer / Poster"),
+    ("walk_in", "Walked In"),
+    ("radio_tv", "Radio / TV"),
+    ("website", "Website"),
+    ("other", "Other"),
+]
+
+
+class FirstTimeVisitor(TimeStampedModel):
+    attendance_record = models.ForeignKey(
+        AttendanceRecord,
+        on_delete=models.CASCADE,
+        related_name="first_time_visitors",
+        verbose_name=_("attendance record"),
+    )
+    name = models.CharField(_("name"), max_length=200)
+    phone = models.CharField(_("phone"), max_length=30, blank=True)
+    email = models.EmailField(_("email"), blank=True)
+    how_heard = models.CharField(
+        _("how they heard"), max_length=30, blank=True, choices=HOW_HEARD_CHOICES
+    )
+    notes = models.TextField(_("notes"), blank=True)
+    followed_up = models.BooleanField(_("followed up"), default=False)
+    converted_to_member = models.ForeignKey(
+        "members.Member",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="converted_from_visitor",
+        verbose_name=_("converted to member"),
+    )
+
+    class Meta:
+        verbose_name = _("first-time visitor")
+        verbose_name_plural = _("first-time visitors")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} @ {self.attendance_record.date}"
+
+
+class ChildCheckIn(TimeStampedModel):
+    attendance_record = models.ForeignKey(
+        AttendanceRecord,
+        on_delete=models.CASCADE,
+        related_name="child_checkins",
+        verbose_name=_("attendance record"),
+    )
+    child_name = models.CharField(_("child name"), max_length=200)
+    age = models.PositiveSmallIntegerField(_("age"), null=True, blank=True)
+    parent_name = models.CharField(_("parent name"), max_length=200, blank=True)
+    parent_phone = models.CharField(_("parent phone"), max_length=30, blank=True)
+    allergy_notes = models.TextField(_("allergy notes"), blank=True)
+    pickup_code = models.CharField(_("pickup code"), max_length=8, default=_pickup_code)
+    member = models.ForeignKey(
+        "members.Member",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="child_checkins",
+        verbose_name=_("member"),
+    )
+    checked_out = models.BooleanField(_("checked out"), default=False)
+
+    class Meta:
+        verbose_name = _("child check-in")
+        verbose_name_plural = _("child check-ins")
+        ordering = ["child_name"]
+
+    def __str__(self):
+        return f"{self.child_name} @ {self.attendance_record.date}"

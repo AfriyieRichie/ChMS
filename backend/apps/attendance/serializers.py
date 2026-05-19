@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import ServiceType, AttendanceRecord, AttendanceEntry
+from .models import ServiceType, AttendanceRecord, AttendanceEntry, FirstTimeVisitor, ChildCheckIn
 
 
 class ServiceTypeSerializer(serializers.ModelSerializer):
@@ -46,3 +46,32 @@ class AttendanceRecordListSerializer(serializers.ModelSerializer):
             "id", "date", "service_type", "service_type_name",
             "attendance_type", "total_count", "first_timers",
         ]
+
+
+class FirstTimeVisitorSerializer(serializers.ModelSerializer):
+    record_date = serializers.DateField(source="attendance_record.date", read_only=True)
+    record_service = serializers.CharField(source="attendance_record.service_type.name", read_only=True)
+
+    class Meta:
+        model = FirstTimeVisitor
+        fields = [
+            "id", "attendance_record", "record_date", "record_service",
+            "name", "phone", "email", "how_heard", "notes",
+            "followed_up", "converted_to_member",
+            "created_at",
+        ]
+        read_only_fields = ["id", "record_date", "record_service", "created_at"]
+
+
+class ChildCheckInSerializer(serializers.ModelSerializer):
+    record_date = serializers.DateField(source="attendance_record.date", read_only=True)
+
+    class Meta:
+        model = ChildCheckIn
+        fields = [
+            "id", "attendance_record", "record_date",
+            "child_name", "age", "parent_name", "parent_phone",
+            "allergy_notes", "pickup_code", "member", "checked_out",
+            "created_at",
+        ]
+        read_only_fields = ["id", "pickup_code", "record_date", "created_at"]

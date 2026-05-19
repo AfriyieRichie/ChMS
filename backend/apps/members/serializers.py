@@ -5,14 +5,16 @@ from .models import Household, Member, MemberTag, BranchMembership, Discipleship
 
 class HouseholdSerializer(serializers.ModelSerializer):
     member_count = serializers.IntegerField(read_only=True)
+    head_name = serializers.CharField(source="head.full_name", read_only=True, default=None)
 
     class Meta:
         model = Household
         fields = [
             "id", "name", "address", "phone", "branch",
+            "head", "head_name", "anniversary_date",
             "member_count", "created_at", "updated_at",
         ]
-        read_only_fields = ["id", "member_count", "created_at", "updated_at"]
+        read_only_fields = ["id", "member_count", "head_name", "created_at", "updated_at"]
 
 
 class HouseholdSummarySerializer(serializers.ModelSerializer):
@@ -116,8 +118,16 @@ class MemberListSerializer(serializers.ModelSerializer):
             "id", "full_name", "gender", "phone", "email",
             "membership_status", "baptism_status", "date_of_birth",
             "date_joined", "primary_branch", "tags",
+            "household", "household_name", "photo",
         ]
 
     def get_primary_branch(self, obj):
         branch = obj.primary_branch
         return {"id": branch.pk, "name": branch.name} if branch else None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and data.get("photo"):
+            data["photo"] = request.build_absolute_uri(data["photo"])
+        return data

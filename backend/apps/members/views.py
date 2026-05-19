@@ -2,7 +2,7 @@ import csv
 import io
 
 from django.db import models
-from django.db.models import Count, Q, Max
+from django.db.models import Count, Q, Max, Sum
 from django.utils import timezone
 
 from rest_framework import status
@@ -47,6 +47,26 @@ class HouseholdViewSet(BranchScopedViewSet):
         instance.deleted_at = timezone.now()
         instance.save(update_fields=["deleted_at"])
         log_action(self.request.user, AuditLog.Action.DELETE, instance, request=self.request)
+
+    @action(detail=True, methods=["get"])
+    def giving(self, request, pk=None):
+        household = self.get_object()
+        from apps.finance.models import Contribution
+        qs = Contribution.objects.filter(
+            member__household=household,
+            is_reversal=False,
+            deleted_at__isnull=True,
+        )
+        branch = getattr(request, "branch", None)
+        if branch:
+            qs = qs.filter(branch=branch)
+        by_fund = (
+            qs.values("fund__name", "currency")
+            .annotate(total=Sum("amount"), count=Count("id"))
+            .order_by("fund__name")
+        )
+        grand_total = qs.aggregate(total=Sum("amount"))["total"] or 0
+        return Response({"grand_total": grand_total, "by_fund": list(by_fund)})
 
 
 class MemberTagViewSet(BranchScopedViewSet):

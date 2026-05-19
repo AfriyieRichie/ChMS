@@ -17,6 +17,9 @@ class Branch(TimeStampedModel):
     timezone = models.CharField(_("timezone"), max_length=50, default="Africa/Accra")
     currency = models.CharField(_("currency"), max_length=3, default="GHS")
     is_active = models.BooleanField(_("active"), default=True)
+    pastor = models.CharField(_("pastor"), max_length=200, blank=True)
+    service_times = models.JSONField(_("service times"), default=list, blank=True)
+    logo = models.ImageField(_("logo"), upload_to="branches/logos/", null=True, blank=True)
     parent_branch = models.ForeignKey(
         "self",
         null=True,

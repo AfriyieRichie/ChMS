@@ -8,11 +8,20 @@ class Household(TimeStampedModel):
     name = models.CharField(_("household name"), max_length=255)
     address = models.TextField(_("address"), blank=True)
     phone = models.CharField(_("phone"), max_length=30, blank=True)
+    anniversary_date = models.DateField(_("anniversary date"), null=True, blank=True)
     branch = models.ForeignKey(
         "branches.Branch",
         on_delete=models.PROTECT,
         related_name="households",
         verbose_name=_("branch"),
+    )
+    head = models.ForeignKey(
+        "Member",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="headed_households",
+        verbose_name=_("head of household"),
     )
 
     class Meta:

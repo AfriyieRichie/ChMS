@@ -24,6 +24,8 @@
   {"model": "accounts.capability", "pk": 23, "fields": {"codename": "groups.manage", "description": "Create and edit groups"}},
   {"model": "accounts.capability", "pk": 24, "fields": {"codename": "discipleship.view", "description": "View discipleship records"}},
   {"model": "accounts.capability", "pk": 25, "fields": {"codename": "discipleship.manage", "description": "Manage discipleship records"}},
+  {"model": "accounts.capability", "pk": 26, "fields": {"codename": "communications.view", "description": "View announcements"}},
+  {"model": "accounts.capability", "pk": 27, "fields": {"codename": "communications.manage", "description": "Create and manage announcements"}},
 
   {"model": "accounts.role", "pk": 1, "fields": {"name": "Pastor / Lead", "description": "Senior pastor with full branch access"}},
   {"model": "accounts.role", "pk": 2, "fields": {"name": "Administrator", "description": "Office administrator with broad access"}},
@@ -113,5 +115,13 @@
 
   {"model": "accounts.rolecapability", "pk": 69, "fields": {"role": 6, "capability": 20}},
   {"model": "accounts.rolecapability", "pk": 70, "fields": {"role": 6, "capability": 22}},
-  {"model": "accounts.rolecapability", "pk": 71, "fields": {"role": 6, "capability": 24}}
+  {"model": "accounts.rolecapability", "pk": 71, "fields": {"role": 6, "capability": 24}},
+
+  {"model": "accounts.rolecapability", "pk": 72, "fields": {"role": 1, "capability": 26}},
+  {"model": "accounts.rolecapability", "pk": 73, "fields": {"role": 1, "capability": 27}},
+  {"model": "accounts.rolecapability", "pk": 74, "fields": {"role": 2, "capability": 26}},
+  {"model": "accounts.rolecapability", "pk": 75, "fields": {"role": 2, "capability": 27}},
+  {"model": "accounts.rolecapability", "pk": 76, "fields": {"role": 3, "capability": 26}},
+  {"model": "accounts.rolecapability", "pk": 77, "fields": {"role": 5, "capability": 26}},
+  {"model": "accounts.rolecapability", "pk": 78, "fields": {"role": 6, "capability": 26}}
 ]

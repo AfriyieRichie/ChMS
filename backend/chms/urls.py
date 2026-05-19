@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.core.health import health_check
+from apps.core.dashboard import dashboard_summary
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -24,6 +25,8 @@ urlpatterns = [
     path("api/v1/", include("apps.finance.urls")),
     path("api/v1/", include("apps.events.urls")),
     path("api/v1/", include("apps.groups.urls")),
+    path("api/v1/", include("apps.communications.urls")),
+    path("api/v1/dashboard/summary/", dashboard_summary, name="dashboard-summary"),
     # OpenAPI schema + docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

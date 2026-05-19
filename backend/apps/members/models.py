@@ -115,6 +115,58 @@ class Member(TimeStampedModel):
         return membership.branch if membership else None
 
 
+class DiscipleshipRecord(TimeStampedModel):
+    class Stage(models.TextChoices):
+        NEW_BELIEVER = "new_believer", _("New Believer")
+        FOUNDATION = "foundation", _("Foundation Class")
+        WATER_BAPTISM = "water_baptism", _("Water Baptism")
+        HOLY_SPIRIT = "holy_spirit", _("Holy Spirit Baptism")
+        DISCIPLESHIP = "discipleship", _("Discipleship Class")
+        MEMBERSHIP = "membership", _("Membership Class")
+
+    class Status(models.TextChoices):
+        IN_PROGRESS = "in_progress", _("In Progress")
+        COMPLETED = "completed", _("Completed")
+        DROPPED = "dropped", _("Dropped")
+
+    member = models.ForeignKey(
+        Member,
+        on_delete=models.CASCADE,
+        related_name="discipleship_records",
+        verbose_name=_("member"),
+    )
+    branch = models.ForeignKey(
+        "branches.Branch",
+        on_delete=models.CASCADE,
+        related_name="discipleship_records",
+        verbose_name=_("branch"),
+    )
+    stage = models.CharField(_("stage"), max_length=20, choices=Stage.choices)
+    status = models.CharField(
+        _("status"), max_length=20, choices=Status.choices, default=Status.IN_PROGRESS
+    )
+    started_at = models.DateField(_("started at"))
+    completed_at = models.DateField(_("completed at"), null=True, blank=True)
+    facilitator = models.ForeignKey(
+        Member,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="facilitated_records",
+        verbose_name=_("facilitator"),
+    )
+    notes = models.TextField(_("notes"), blank=True)
+
+    class Meta:
+        verbose_name = _("discipleship record")
+        verbose_name_plural = _("discipleship records")
+        ordering = ["member", "stage"]
+        unique_together = [("member", "stage")]
+
+    def __str__(self):
+        return f"{self.member} — {self.get_stage_display()} ({self.get_status_display()})"
+
+
 class BranchMembership(TimeStampedModel):
     member = models.ForeignKey(
         Member,

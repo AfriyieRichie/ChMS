@@ -18,6 +18,12 @@
   {"model": "accounts.capability", "pk": 17, "fields": {"codename": "finance.manage_funds", "description": "Create and edit funds and giving categories"}},
   {"model": "accounts.capability", "pk": 18, "fields": {"codename": "finance.lock_period", "description": "Lock and unlock financial periods"}},
   {"model": "accounts.capability", "pk": 19, "fields": {"codename": "finance.view_reports", "description": "View financial reports and summaries"}},
+  {"model": "accounts.capability", "pk": 20, "fields": {"codename": "events.view", "description": "View events and registrations"}},
+  {"model": "accounts.capability", "pk": 21, "fields": {"codename": "events.manage", "description": "Create and edit events"}},
+  {"model": "accounts.capability", "pk": 22, "fields": {"codename": "groups.view", "description": "View groups and memberships"}},
+  {"model": "accounts.capability", "pk": 23, "fields": {"codename": "groups.manage", "description": "Create and edit groups"}},
+  {"model": "accounts.capability", "pk": 24, "fields": {"codename": "discipleship.view", "description": "View discipleship records"}},
+  {"model": "accounts.capability", "pk": 25, "fields": {"codename": "discipleship.manage", "description": "Manage discipleship records"}},
 
   {"model": "accounts.role", "pk": 1, "fields": {"name": "Pastor / Lead", "description": "Senior pastor with full branch access"}},
   {"model": "accounts.role", "pk": 2, "fields": {"name": "Administrator", "description": "Office administrator with broad access"}},
@@ -89,5 +95,23 @@
   {"model": "accounts.rolecapability", "pk": 54, "fields": {"role": 2, "capability": 19}},
 
   {"model": "accounts.rolecapability", "pk": 55, "fields": {"role": 6, "capability": 15}},
-  {"model": "accounts.rolecapability", "pk": 56, "fields": {"role": 6, "capability": 19}}
+  {"model": "accounts.rolecapability", "pk": 56, "fields": {"role": 6, "capability": 19}},
+
+  {"model": "accounts.rolecapability", "pk": 57, "fields": {"role": 1, "capability": 20}},
+  {"model": "accounts.rolecapability", "pk": 58, "fields": {"role": 1, "capability": 21}},
+  {"model": "accounts.rolecapability", "pk": 59, "fields": {"role": 1, "capability": 22}},
+  {"model": "accounts.rolecapability", "pk": 60, "fields": {"role": 1, "capability": 23}},
+  {"model": "accounts.rolecapability", "pk": 61, "fields": {"role": 1, "capability": 24}},
+  {"model": "accounts.rolecapability", "pk": 62, "fields": {"role": 1, "capability": 25}},
+
+  {"model": "accounts.rolecapability", "pk": 63, "fields": {"role": 2, "capability": 20}},
+  {"model": "accounts.rolecapability", "pk": 64, "fields": {"role": 2, "capability": 21}},
+  {"model": "accounts.rolecapability", "pk": 65, "fields": {"role": 2, "capability": 22}},
+  {"model": "accounts.rolecapability", "pk": 66, "fields": {"role": 2, "capability": 23}},
+  {"model": "accounts.rolecapability", "pk": 67, "fields": {"role": 2, "capability": 24}},
+  {"model": "accounts.rolecapability", "pk": 68, "fields": {"role": 2, "capability": 25}},
+
+  {"model": "accounts.rolecapability", "pk": 69, "fields": {"role": 6, "capability": 20}},
+  {"model": "accounts.rolecapability", "pk": 70, "fields": {"role": 6, "capability": 22}},
+  {"model": "accounts.rolecapability", "pk": 71, "fields": {"role": 6, "capability": 24}}
 ]

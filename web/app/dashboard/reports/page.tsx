@@ -54,7 +54,7 @@ export default function ReportsPage() {
       {/* Stat overview row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Active Members", value: summary?.members.total ?? "—" },
+          { label: "Active Members", value: summary?.members.branch_total ?? "—" },
           { label: "Last Attendance", value: summary?.attendance.last_total ?? "—" },
           {
             label: `Giving (${summary ? MONTH_NAMES[(summary.finance.month ?? 1) - 1] : "—"})`,
@@ -62,7 +62,7 @@ export default function ReportsPage() {
               ? `GHS ${Number(summary.finance.this_month).toLocaleString("en-GH", { minimumFractionDigits: 2 })}`
               : "—",
           },
-          { label: "Active Groups", value: summary?.groups.active ?? "—" },
+          { label: "Active Groups", value: summary?.attendance.active_groups ?? "—" },
         ].map(({ label, value }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</p>

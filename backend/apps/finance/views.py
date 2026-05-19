@@ -1,5 +1,6 @@
-from datetime import date
-from django.db.models import Sum, Count, Q
+from datetime import date, timedelta
+
+from django.db.models import Sum, Count, Q, Max
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 
@@ -12,7 +13,7 @@ from apps.accounts.permissions import make_capability_permission
 from apps.core.audit import log_action, AuditLog
 from apps.core.viewsets import BranchScopedViewSet
 
-from .models import Fund, GivingCategory, FinancialPeriod, Pledge, Contribution, Receipt
+from .models import Fund, GivingCategory, FinancialPeriod, Pledge, Contribution, Receipt, ContributionBatch, BankDeposit
 from .serializers import (
     FundSerializer,
     GivingCategorySerializer,
@@ -21,6 +22,8 @@ from .serializers import (
     ContributionSerializer,
     ContributionListSerializer,
     ReversalSerializer,
+    ContributionBatchSerializer,
+    BankDepositSerializer,
 )
 
 CanViewFinance = make_capability_permission("finance.view_giving")
@@ -261,3 +264,136 @@ class ContributionViewSet(BranchScopedViewSet):
             "grand_total": grand_total,
             "by_fund": list(by_fund),
         })
+
+    @action(detail=False, methods=["get"])
+    def by_member(self, request):
+        """Giving totals per member for a given year — annual statement data."""
+        year_param = request.query_params.get("year", date.today().year)
+        try:
+            year = int(year_param)
+        except (ValueError, TypeError):
+            raise ValidationError({"year": "Must be a valid 4-digit year."})
+        qs = (
+            self.get_queryset()
+            .filter(is_reversal=False, given_at__year=year, member__isnull=False)
+            .values("member", "member__full_name", "currency")
+            .annotate(total=Sum("amount"), count=Count("id"))
+            .order_by("-total")
+        )
+        return Response(list(qs))
+
+    @action(detail=False, methods=["get"])
+    def top_givers(self, request):
+        """Top N givers by total contribution in a date range. Requires view_reports permission."""
+        if not CanViewReports().has_permission(request, self):
+            raise PermissionDenied("You do not have permission to view top givers.")
+        limit = min(int(request.query_params.get("limit", 20)), 100)
+        qs = self.get_queryset().filter(is_reversal=False, member__isnull=False)
+        date_from = request.query_params.get("date_from")
+        date_to = request.query_params.get("date_to")
+        if date_from:
+            qs = qs.filter(given_at__gte=date_from)
+        if date_to:
+            qs = qs.filter(given_at__lte=date_to)
+        data = (
+            qs.values("member", "member__full_name", "currency")
+            .annotate(total=Sum("amount"), count=Count("id"))
+            .order_by("-total")[:limit]
+        )
+        return Response(list(data))
+
+    @action(detail=False, methods=["get"])
+    def lapsed(self, request):
+        """Members who last gave more than N days ago. Default: 90 days."""
+        days = int(request.query_params.get("days", 90))
+        cutoff = date.today() - timedelta(days=days)
+        branch = getattr(request, "branch", None)
+        from apps.members.models import Member as MemberModel
+        qs = (
+            MemberModel.objects.filter(
+                branch_memberships__branch=branch,
+                branch_memberships__left_at__isnull=True,
+                contributions__branch=branch,
+                contributions__is_reversal=False,
+                contributions__deleted_at__isnull=True,
+            )
+            .annotate(
+                last_given=Max("contributions__given_at"),
+                total_given=Sum("contributions__amount"),
+            )
+            .filter(last_given__lt=cutoff)
+            .order_by("last_given")
+            .distinct()
+        )
+        return Response([
+            {
+                "member_id": m.id,
+                "member_name": m.full_name,
+                "last_given": m.last_given,
+                "total_given": str(m.total_given or 0),
+            }
+            for m in qs
+        ])
+
+
+# ── Contribution Batches ──────────────────────────────────────────────────────
+
+class ContributionBatchViewSet(BranchScopedViewSet):
+    queryset = ContributionBatch.objects.filter(deleted_at__isnull=True).select_related("created_by", "posted_by")
+    serializer_class = ContributionBatchSerializer
+
+    def get_permissions(self):
+        if self.action in ("list", "retrieve"):
+            return [CanViewFinance()]
+        return [CanRecordFinance()]
+
+    def perform_create(self, serializer):
+        branch = getattr(self.request, "branch", None)
+        serializer.save(branch=branch, created_by=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.is_posted:
+            raise PermissionDenied("Cannot delete a posted batch.")
+        instance.deleted_at = timezone.now()
+        instance.save(update_fields=["deleted_at"])
+
+    @action(detail=True, methods=["post"])
+    def post_batch(self, request, pk=None):
+        batch = self.get_object()
+        if batch.is_posted:
+            raise ValidationError("Batch is already posted.")
+        if batch.contributions.filter(deleted_at__isnull=True).count() == 0:
+            raise ValidationError("Cannot post an empty batch.")
+        batch.is_posted = True
+        batch.posted_at = timezone.now()
+        batch.posted_by = request.user
+        batch.save(update_fields=["is_posted", "posted_at", "posted_by"])
+        log_action(request.user, AuditLog.Action.UPDATE, batch, request=request)
+        return Response(ContributionBatchSerializer(batch).data)
+
+
+# ── Bank Deposits ─────────────────────────────────────────────────────────────
+
+class BankDepositViewSet(BranchScopedViewSet):
+    queryset = BankDeposit.objects.filter(deleted_at__isnull=True).select_related("created_by")
+    serializer_class = BankDepositSerializer
+
+    def get_permissions(self):
+        if self.action in ("list", "retrieve"):
+            return [CanViewFinance()]
+        return [CanManageFunds()]
+
+    def perform_create(self, serializer):
+        branch = getattr(self.request, "branch", None)
+        serializer.save(branch=branch, created_by=self.request.user)
+
+    def perform_destroy(self, instance):
+        instance.deleted_at = timezone.now()
+        instance.save(update_fields=["deleted_at"])
+
+    @action(detail=True, methods=["post"])
+    def toggle_reconciled(self, request, pk=None):
+        deposit = self.get_object()
+        deposit.is_reconciled = not deposit.is_reconciled
+        deposit.save(update_fields=["is_reconciled"])
+        return Response(BankDepositSerializer(deposit).data)

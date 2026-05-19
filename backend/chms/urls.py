@@ -27,6 +27,7 @@ urlpatterns = [
     path("api/v1/", include("apps.events.urls")),
     path("api/v1/", include("apps.groups.urls")),
     path("api/v1/", include("apps.communications.urls")),
+    path("api/v1/", include("apps.reports.urls")),
     path("api/v1/dashboard/summary/", dashboard_summary, name="dashboard-summary"),
     path("api/v1/dashboard/overview/", dashboard_overview, name="dashboard-overview"),
     path("api/v1/", include("apps.core.urls")),

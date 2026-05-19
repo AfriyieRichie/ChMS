@@ -60,6 +60,7 @@ export interface Contribution {
   category_name: string | null;
   financial_period: number | null;
   pledge: number | null;
+  batch: number | null;
   amount: string;
   currency: string;
   given_at: string;
@@ -191,4 +192,143 @@ export async function updatePledge(id: number, payload: Partial<Pledge>, branchI
 export async function getFinancialPeriods(branchId: number): Promise<FinancialPeriod[]> {
   const { data } = await api.get("/api/v1/finance/periods/", { headers: h(branchId) });
   return Array.isArray(data) ? data : data.results ?? [];
+}
+
+export async function createFinancialPeriod(payload: { year: number; month: number }, branchId: number): Promise<FinancialPeriod> {
+  const { data } = await api.post("/api/v1/finance/periods/", { ...payload, branch: branchId }, { headers: h(branchId) });
+  return data;
+}
+
+export async function lockPeriod(id: number, branchId: number): Promise<FinancialPeriod> {
+  const { data } = await api.post(`/api/v1/finance/periods/${id}/lock/`, {}, { headers: h(branchId) });
+  return data;
+}
+
+export async function unlockPeriod(id: number, branchId: number): Promise<FinancialPeriod> {
+  const { data } = await api.post(`/api/v1/finance/periods/${id}/unlock/`, {}, { headers: h(branchId) });
+  return data;
+}
+
+// ── Giving Reports ────────────────────────────────────────────────────────────
+
+export interface GivingByMember {
+  member: number;
+  member__full_name: string;
+  currency: string;
+  total: string;
+  count: number;
+}
+
+export interface LapsedGiver {
+  member_id: number;
+  member_name: string;
+  last_given: string | null;
+  total_given: string;
+}
+
+export async function getGivingByMember(branchId: number, year: number): Promise<GivingByMember[]> {
+  const { data } = await api.get("/api/v1/finance/contributions/by_member/", {
+    headers: h(branchId),
+    params: { year },
+  });
+  return data;
+}
+
+export async function getTopGivers(
+  branchId: number,
+  params?: { date_from?: string; date_to?: string; limit?: number }
+): Promise<GivingByMember[]> {
+  const { data } = await api.get("/api/v1/finance/contributions/top_givers/", {
+    headers: h(branchId),
+    params,
+  });
+  return data;
+}
+
+export async function getLapsedGivers(branchId: number, days = 90): Promise<LapsedGiver[]> {
+  const { data } = await api.get("/api/v1/finance/contributions/lapsed/", {
+    headers: h(branchId),
+    params: { days },
+  });
+  return data;
+}
+
+// ── Contribution Batches ──────────────────────────────────────────────────────
+
+export interface ContributionBatch {
+  id: number;
+  branch: number;
+  name: string;
+  service_date: string;
+  notes: string;
+  is_posted: boolean;
+  posted_at: string | null;
+  posted_by: number | null;
+  posted_by_name: string | null;
+  created_by: number | null;
+  created_by_name: string | null;
+  total_amount: string;
+  contribution_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getContributionBatches(branchId: number): Promise<PaginatedResponse<ContributionBatch>> {
+  const { data } = await api.get("/api/v1/finance/batches/", { headers: h(branchId) });
+  return data;
+}
+
+export async function createContributionBatch(
+  payload: { name: string; service_date: string; notes?: string },
+  branchId: number
+): Promise<ContributionBatch> {
+  const { data } = await api.post("/api/v1/finance/batches/", { ...payload, branch: branchId }, { headers: h(branchId) });
+  return data;
+}
+
+export async function postContributionBatch(id: number, branchId: number): Promise<ContributionBatch> {
+  const { data } = await api.post(`/api/v1/finance/batches/${id}/post_batch/`, {}, { headers: h(branchId) });
+  return data;
+}
+
+export async function deleteContributionBatch(id: number, branchId: number): Promise<void> {
+  await api.delete(`/api/v1/finance/batches/${id}/`, { headers: h(branchId) });
+}
+
+// ── Bank Deposits ─────────────────────────────────────────────────────────────
+
+export interface BankDeposit {
+  id: number;
+  branch: number;
+  date: string;
+  amount: string;
+  reference: string;
+  notes: string;
+  is_reconciled: boolean;
+  created_by: number | null;
+  created_by_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getBankDeposits(branchId: number): Promise<PaginatedResponse<BankDeposit>> {
+  const { data } = await api.get("/api/v1/finance/deposits/", { headers: h(branchId) });
+  return data;
+}
+
+export async function createBankDeposit(
+  payload: { date: string; amount: string; reference: string; notes?: string },
+  branchId: number
+): Promise<BankDeposit> {
+  const { data } = await api.post("/api/v1/finance/deposits/", { ...payload, branch: branchId }, { headers: h(branchId) });
+  return data;
+}
+
+export async function toggleDepositReconciled(id: number, branchId: number): Promise<BankDeposit> {
+  const { data } = await api.post(`/api/v1/finance/deposits/${id}/toggle_reconciled/`, {}, { headers: h(branchId) });
+  return data;
+}
+
+export async function deleteBankDeposit(id: number, branchId: number): Promise<void> {
+  await api.delete(`/api/v1/finance/deposits/${id}/`, { headers: h(branchId) });
 }

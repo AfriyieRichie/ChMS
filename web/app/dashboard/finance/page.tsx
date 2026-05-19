@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { DollarSign, Landmark, FileText } from "lucide-react";
+import { DollarSign, Landmark, FileText, Layers, BarChart2, GitMerge } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { getContributionSummary, getContributions } from "@/lib/api/finance";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -21,9 +21,12 @@ function currentPeriod() {
 }
 
 const NAV_CARDS: { label: string; href: string; Icon: LucideIcon; desc: string }[] = [
-  { label: "Contributions", href: "/dashboard/finance/contributions", Icon: DollarSign, desc: "Record and view giving" },
-  { label: "Funds", href: "/dashboard/finance/funds", Icon: Landmark, desc: "Manage funds and categories" },
-  { label: "Pledges", href: "/dashboard/finance/pledges", Icon: FileText, desc: "Track member pledges" },
+  { label: "Contributions",   href: "/dashboard/finance/contributions",   Icon: DollarSign,  desc: "Record and view giving" },
+  { label: "Batch Entry",     href: "/dashboard/finance/batch",           Icon: Layers,      desc: "Fast post-service entry" },
+  { label: "Funds",           href: "/dashboard/finance/funds",           Icon: Landmark,    desc: "Manage funds and categories" },
+  { label: "Pledges",         href: "/dashboard/finance/pledges",         Icon: FileText,    desc: "Track member pledges" },
+  { label: "Reports",         href: "/dashboard/finance/reports",         Icon: BarChart2,   desc: "Giving statements and analytics" },
+  { label: "Reconciliation",  href: "/dashboard/finance/reconciliation",  Icon: GitMerge,    desc: "Match deposits to contributions" },
 ];
 
 export default function FinancePage() {
@@ -72,7 +75,7 @@ export default function FinancePage() {
       </div>
 
       {/* Quick nav */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {NAV_CARDS.map(({ label, href, Icon, desc }) => (
           <Link key={href} href={href}
             className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 flex items-start gap-3">

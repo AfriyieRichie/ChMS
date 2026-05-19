@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
-from .models import Fund, GivingCategory, FinancialPeriod, Pledge, Contribution, Receipt
+from .models import Fund, GivingCategory, FinancialPeriod, Pledge, Contribution, Receipt, ContributionBatch, BankDeposit
 
 
 class FundSerializer(serializers.ModelSerializer):
@@ -115,3 +115,34 @@ class ContributionListSerializer(serializers.ModelSerializer):
 
 class ReversalSerializer(serializers.Serializer):
     reason = serializers.CharField(max_length=255, required=False, allow_blank=True)
+
+
+class ContributionBatchSerializer(serializers.ModelSerializer):
+    total_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    contribution_count = serializers.IntegerField(read_only=True)
+    posted_by_name = serializers.CharField(source="posted_by.full_name", read_only=True)
+    created_by_name = serializers.CharField(source="created_by.full_name", read_only=True)
+
+    class Meta:
+        model = ContributionBatch
+        fields = [
+            "id", "branch", "name", "service_date", "notes",
+            "is_posted", "posted_at", "posted_by", "posted_by_name",
+            "created_by", "created_by_name",
+            "total_amount", "contribution_count",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "is_posted", "posted_at", "posted_by", "created_by", "created_at", "updated_at"]
+
+
+class BankDepositSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(source="created_by.full_name", read_only=True)
+
+    class Meta:
+        model = BankDeposit
+        fields = [
+            "id", "branch", "date", "amount", "reference", "notes",
+            "is_reconciled", "created_by", "created_by_name",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_by", "created_at", "updated_at"]

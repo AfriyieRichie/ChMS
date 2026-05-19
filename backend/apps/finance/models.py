@@ -159,6 +159,76 @@ class Pledge(TimeStampedModel):
         return self.amount - self.total_fulfilled
 
 
+class ContributionBatch(TimeStampedModel):
+    """Groups contributions from a single service collection for batch entry."""
+
+    branch = models.ForeignKey(
+        "branches.Branch", on_delete=models.CASCADE,
+        related_name="contribution_batches", verbose_name=_("branch"),
+    )
+    name = models.CharField(_("name"), max_length=200)
+    service_date = models.DateField(_("service date"))
+    notes = models.TextField(_("notes"), blank=True)
+    is_posted = models.BooleanField(_("posted"), default=False)
+    posted_at = models.DateTimeField(_("posted at"), null=True, blank=True)
+    posted_by = models.ForeignKey(
+        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="+", verbose_name=_("posted by"),
+    )
+    created_by = models.ForeignKey(
+        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="+", verbose_name=_("created by"),
+    )
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("contribution batch")
+        verbose_name_plural = _("contribution batches")
+        ordering = ["-service_date", "-created_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.service_date})"
+
+    @property
+    def total_amount(self):
+        return (
+            self.contributions.filter(deleted_at__isnull=True, is_reversal=False)
+            .aggregate(total=models.Sum("amount"))["total"]
+            or Decimal("0.00")
+        )
+
+    @property
+    def contribution_count(self):
+        return self.contributions.filter(deleted_at__isnull=True, is_reversal=False).count()
+
+
+class BankDeposit(TimeStampedModel):
+    """Bank deposit record for reconciliation against contribution batches."""
+
+    branch = models.ForeignKey(
+        "branches.Branch", on_delete=models.CASCADE,
+        related_name="bank_deposits", verbose_name=_("branch"),
+    )
+    date = models.DateField(_("deposit date"))
+    amount = models.DecimalField(_("amount"), max_digits=12, decimal_places=2)
+    reference = models.CharField(_("reference"), max_length=200)
+    notes = models.TextField(_("notes"), blank=True)
+    is_reconciled = models.BooleanField(_("reconciled"), default=False)
+    created_by = models.ForeignKey(
+        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="+", verbose_name=_("created by"),
+    )
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("bank deposit")
+        verbose_name_plural = _("bank deposits")
+        ordering = ["-date"]
+
+    def __str__(self):
+        return f"{self.date} — {self.amount} ({self.reference})"
+
+
 class Contribution(TimeStampedModel):
     class PaymentMethod(models.TextChoices):
         CASH = "cash", _("Cash")
@@ -211,6 +281,14 @@ class Contribution(TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="contributions",
         verbose_name=_("pledge"),
+    )
+    batch = models.ForeignKey(
+        ContributionBatch,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="contributions",
+        verbose_name=_("batch"),
     )
     # Negative amount for reversal entries
     amount = models.DecimalField(_("amount"), max_digits=12, decimal_places=2)

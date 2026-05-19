@@ -247,9 +247,9 @@ class Contribution(TimeStampedModel):
         verbose_name_plural = _("contributions")
         ordering = ["-given_at", "-created_at"]
         indexes = [
-            models.Index(fields=["branch", "given_at"], name="finance_contrib_branch_date_idx"),
-            models.Index(fields=["member"], name="finance_contrib_member_idx"),
-            models.Index(fields=["financial_period"], name="finance_contrib_period_idx"),
+            models.Index(fields=["branch", "given_at"], name="fin_contrib_br_date_idx"),
+            models.Index(fields=["member"], name="fin_contrib_member_idx"),
+            models.Index(fields=["financial_period"], name="fin_contrib_period_idx"),
         ]
 
     def __str__(self):

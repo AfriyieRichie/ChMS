@@ -10,6 +10,7 @@ export interface ServiceType {
 
 export interface AttendanceRecord {
   id: number;
+  branch: number;
   date: string;
   service_type: number;
   service_type_name: string;

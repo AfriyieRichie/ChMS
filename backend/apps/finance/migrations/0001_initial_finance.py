@@ -119,15 +119,15 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="contribution",
-            index=models.Index(fields=["branch", "given_at"], name="finance_contrib_branch_date_idx"),
+            index=models.Index(fields=["branch", "given_at"], name="fin_contrib_br_date_idx"),
         ),
         migrations.AddIndex(
             model_name="contribution",
-            index=models.Index(fields=["member"], name="finance_contrib_member_idx"),
+            index=models.Index(fields=["member"], name="fin_contrib_member_idx"),
         ),
         migrations.AddIndex(
             model_name="contribution",
-            index=models.Index(fields=["financial_period"], name="finance_contrib_period_idx"),
+            index=models.Index(fields=["financial_period"], name="fin_contrib_period_idx"),
         ),
         migrations.CreateModel(
             name="Receipt",

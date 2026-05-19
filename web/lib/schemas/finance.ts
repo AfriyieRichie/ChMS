@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const contributionSchema = z.object({
-  fund: z.coerce.number({ required_error: "Fund is required" }).positive("Fund is required"),
+  fund: z.coerce.number().min(1, "Fund is required"),
   category: z.coerce.number().optional().nullable(),
   member: z.coerce.number().optional().nullable(),
   pledge: z.coerce.number().optional().nullable(),
@@ -29,10 +29,13 @@ export const fundSchema = z.object({
 export type FundFormValues = z.infer<typeof fundSchema>;
 
 export const pledgeSchema = z.object({
-  member: z.coerce.number({ required_error: "Member is required" }).positive(),
-  fund: z.coerce.number({ required_error: "Fund is required" }).positive(),
+  member: z.coerce.number().min(1, "Member is required"),
+  fund: z.coerce.number().min(1, "Fund is required"),
   category: z.coerce.number().optional().nullable(),
-  amount: z.string().min(1).refine((v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0, "Must be positive"),
+  amount: z.string().min(1, "Amount is required").refine(
+    (v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0,
+    "Must be positive"
+  ),
   currency: z.string().default("GHS"),
   start_date: z.string().min(1, "Start date required"),
   end_date: z.string().optional().nullable(),

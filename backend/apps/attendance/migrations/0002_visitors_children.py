@@ -1,4 +1,4 @@
-import attendance.models
+import apps.attendance.models
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
                 ("parent_phone", models.CharField(blank=True, max_length=30, verbose_name="parent phone")),
                 ("allergy_notes", models.TextField(blank=True, verbose_name="allergy notes")),
                 ("pickup_code", models.CharField(
-                    default=attendance.models._pickup_code,
+                    default=apps.attendance.models._pickup_code,
                     max_length=8, verbose_name="pickup code",
                 )),
                 ("checked_out", models.BooleanField(default=False, verbose_name="checked out")),

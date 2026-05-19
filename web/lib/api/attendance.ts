@@ -39,6 +39,34 @@ export async function getServiceTypes(branchId: number): Promise<ServiceType[]> 
   return Array.isArray(data) ? data : data.results ?? [];
 }
 
+export async function getAllServiceTypes(branchId: number): Promise<ServiceType[]> {
+  const { data } = await api.get("/api/v1/service-types/", {
+    headers: { "X-Branch-Id": String(branchId) },
+  });
+  return Array.isArray(data) ? data : data.results ?? [];
+}
+
+export async function createServiceType(
+  payload: { name: string; is_active: boolean },
+  branchId: number
+): Promise<ServiceType> {
+  const { data } = await api.post("/api/v1/service-types/", payload, {
+    headers: { "X-Branch-Id": String(branchId) },
+  });
+  return data;
+}
+
+export async function updateServiceType(
+  id: number,
+  payload: Partial<ServiceType>,
+  branchId: number
+): Promise<ServiceType> {
+  const { data } = await api.patch(`/api/v1/service-types/${id}/`, payload, {
+    headers: { "X-Branch-Id": String(branchId) },
+  });
+  return data;
+}
+
 export async function getAttendanceRecords(
   branchId: number,
   params?: { date_from?: string; date_to?: string; service_type?: number; page?: number }

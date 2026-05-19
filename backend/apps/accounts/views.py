@@ -1,6 +1,11 @@
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.branches.models import Branch
@@ -16,6 +21,57 @@ from .serializers import (
 )
 
 CanManageUsers = make_capability_permission("users.manage")
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    email = request.data.get("email", "").strip().lower()
+    if not email:
+        return Response({"detail": "Email is required."}, status=400)
+    try:
+        user = User.objects.get(email__iexact=email, is_active=True, deleted_at__isnull=True)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000")
+        reset_url = f"{frontend_url}/reset-password/confirm?uid={uid}&token={token}"
+        send_mail(
+            subject="Reset your ChMS password",
+            message=(
+                f"Hi {user.full_name},\n\n"
+                f"Click the link below to reset your password:\n\n{reset_url}\n\n"
+                "This link expires in 24 hours.\n\n"
+                "If you didn't request this, you can safely ignore this email."
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+    except User.DoesNotExist:
+        pass
+    return Response({"detail": "If that email is registered, you'll receive a reset link shortly."})
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    uid = request.data.get("uid", "")
+    token = request.data.get("token", "")
+    new_password = request.data.get("new_password", "")
+    if not all([uid, token, new_password]):
+        return Response({"detail": "uid, token, and new_password are required."}, status=400)
+    if len(new_password) < 8:
+        return Response({"detail": "Password must be at least 8 characters."}, status=400)
+    try:
+        pk = force_str(urlsafe_base64_decode(uid))
+        user = User.objects.get(pk=pk, is_active=True)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return Response({"detail": "Invalid reset link."}, status=400)
+    if not default_token_generator.check_token(user, token):
+        return Response({"detail": "Reset link is invalid or has expired."}, status=400)
+    user.set_password(new_password)
+    user.save()
+    return Response({"detail": "Password reset successful. You can now sign in."})
 
 
 @api_view(["GET"])

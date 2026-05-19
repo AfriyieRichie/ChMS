@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAttendanceRecords, getServiceTypes, createAttendanceRecord, type AttendanceRecord } from "@/lib/api/attendance";
+import {
+  getAttendanceRecords, getServiceTypes, createAttendanceRecord,
+  getAllServiceTypes, createServiceType, updateServiceType,
+  type AttendanceRecord, type ServiceType,
+} from "@/lib/api/attendance";
 
 const BRANCH_ID = 1; // TODO: read from auth context / cookie
 
@@ -10,6 +14,8 @@ export default function AttendancePage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [showServiceTypes, setShowServiceTypes] = useState(false);
+  const [newServiceTypeName, setNewServiceTypeName] = useState("");
   const [form, setForm] = useState({
     service_type: "",
     date: new Date().toISOString().slice(0, 10),
@@ -31,6 +37,30 @@ export default function AttendancePage() {
   const { data: serviceTypes } = useQuery({
     queryKey: ["service-types", BRANCH_ID],
     queryFn: () => getServiceTypes(BRANCH_ID),
+  });
+
+  const { data: allServiceTypes } = useQuery({
+    queryKey: ["all-service-types", BRANCH_ID],
+    queryFn: () => getAllServiceTypes(BRANCH_ID),
+    enabled: showServiceTypes,
+  });
+
+  const createSTMutation = useMutation({
+    mutationFn: (name: string) => createServiceType({ name, is_active: true }, BRANCH_ID),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["service-types", BRANCH_ID] });
+      queryClient.invalidateQueries({ queryKey: ["all-service-types", BRANCH_ID] });
+      setNewServiceTypeName("");
+    },
+  });
+
+  const toggleSTMutation = useMutation({
+    mutationFn: ({ id, is_active }: { id: number; is_active: boolean }) =>
+      updateServiceType(id, { is_active }, BRANCH_ID),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["service-types", BRANCH_ID] });
+      queryClient.invalidateQueries({ queryKey: ["all-service-types", BRANCH_ID] });
+    },
   });
 
   const mutation = useMutation({
@@ -188,6 +218,68 @@ export default function AttendancePage() {
               </div>
             )}
           </>
+        )}
+      </div>
+      {/* Service Types management */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button
+          onClick={() => setShowServiceTypes((v) => !v)}
+          className="w-full flex items-center justify-between px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          <span>Manage Service Types</span>
+          <span className="text-gray-400">{showServiceTypes ? "▲" : "▼"}</span>
+        </button>
+
+        {showServiceTypes && (
+          <div className="border-t border-gray-100 px-5 py-4 space-y-4">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="New service type name…"
+                value={newServiceTypeName}
+                onChange={(e) => setNewServiceTypeName(e.target.value)}
+                className="flex-1 border rounded-lg px-3 py-2 text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newServiceTypeName.trim()) {
+                    e.preventDefault();
+                    createSTMutation.mutate(newServiceTypeName.trim());
+                  }
+                }}
+              />
+              <button
+                onClick={() => { if (newServiceTypeName.trim()) createSTMutation.mutate(newServiceTypeName.trim()); }}
+                disabled={!newServiceTypeName.trim() || createSTMutation.isPending}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                Add
+              </button>
+            </div>
+
+            <div className="divide-y divide-gray-50">
+              {!allServiceTypes && <p className="text-sm text-gray-400 py-2">Loading…</p>}
+              {allServiceTypes?.length === 0 && (
+                <p className="text-sm text-gray-400 py-2">No service types yet.</p>
+              )}
+              {allServiceTypes?.map((st: ServiceType) => (
+                <div key={st.id} className="flex items-center justify-between py-2">
+                  <span className={`text-sm ${st.is_active ? "text-gray-800" : "text-gray-400 line-through"}`}>
+                    {st.name}
+                  </span>
+                  <button
+                    onClick={() => toggleSTMutation.mutate({ id: st.id, is_active: !st.is_active })}
+                    disabled={toggleSTMutation.isPending}
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      st.is_active
+                        ? "bg-green-100 text-green-700 hover:bg-red-50 hover:text-red-600"
+                        : "bg-gray-100 text-gray-500 hover:bg-green-50 hover:text-green-700"
+                    }`}
+                  >
+                    {st.is_active ? "Active" : "Inactive"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>

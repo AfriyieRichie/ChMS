@@ -86,7 +86,7 @@ export default function ContributionsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Fund *</label>
-              <select {...register("fund")} className="w-full border rounded-lg px-3 py-2 text-sm">
+              <select {...register("fund", { valueAsNumber: true })} className="w-full border rounded-lg px-3 py-2 text-sm">
                 <option value="">Select fund</option>
                 {funds?.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
@@ -94,7 +94,7 @@ export default function ContributionsPage() {
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Category</label>
-              <select {...register("category")} className="w-full border rounded-lg px-3 py-2 text-sm">
+              <select {...register("category", { setValueAs: (v) => v === "" ? null : Number(v) })} className="w-full border rounded-lg px-3 py-2 text-sm">
                 <option value="">None</option>
                 {categories?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>

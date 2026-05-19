@@ -2,18 +2,35 @@ import api from "@/lib/api";
 
 const h = (branchId: number) => ({ "X-Branch-Id": String(branchId) });
 
+export type EventType = "service" | "conference" | "class" | "social" | "outreach" | "training" | "meeting";
+export type Recurrence = "" | "daily" | "weekly" | "biweekly" | "monthly";
+
+export interface VolunteerSlot {
+  id: number;
+  event: number;
+  role_name: string;
+  slots_needed: number;
+  notes: string;
+}
+
 export interface Event {
   id: number;
   branch: number;
   name: string;
   description: string;
-  event_type: "service" | "special" | "outreach" | "training" | "meeting";
+  event_type: EventType;
   start_datetime: string;
   end_datetime: string | null;
   venue: string;
   capacity: number | null;
+  cost: number | null;
+  registration_required: boolean;
+  banner: string | null;
+  recurrence: Recurrence;
+  recurrence_end: string | null;
   is_published: boolean;
   registration_count: number;
+  volunteer_slots?: VolunteerSlot[];
   created_by: number | null;
   created_by_name: string;
   created_at: string;
@@ -25,7 +42,7 @@ export interface EventRegistration {
   event_name: string;
   member: number | null;
   member_name: string;
-  status: "registered" | "attended" | "cancelled";
+  status: "registered" | "waitlisted" | "attended" | "cancelled";
   notes: string;
   created_at: string;
 }
@@ -39,7 +56,7 @@ export interface PaginatedResponse<T> {
 
 export async function getEvents(
   branchId: number,
-  params?: { event_type?: string; page?: number },
+  params?: { event_type?: string; date_from?: string; date_to?: string; page?: number },
 ): Promise<PaginatedResponse<Event>> {
   const { data } = await api.get("/api/v1/events/", { headers: h(branchId), params });
   return data;
@@ -89,4 +106,22 @@ export async function checkInRegistration(
     { headers: h(branchId) },
   );
   return data;
+}
+
+export async function getVolunteerSlots(eventId: number, branchId: number): Promise<VolunteerSlot[]> {
+  const { data } = await api.get(`/api/v1/events/${eventId}/volunteer-slots/`, { headers: h(branchId) });
+  return Array.isArray(data) ? data : data.results ?? [];
+}
+
+export async function createVolunteerSlot(
+  eventId: number,
+  payload: { role_name: string; slots_needed: number; notes?: string },
+  branchId: number,
+): Promise<VolunteerSlot> {
+  const { data } = await api.post(`/api/v1/events/${eventId}/volunteer-slots/`, payload, { headers: h(branchId) });
+  return data;
+}
+
+export async function deleteVolunteerSlot(eventId: number, slotId: number, branchId: number): Promise<void> {
+  await api.delete(`/api/v1/events/${eventId}/volunteer-slots/${slotId}/`, { headers: h(branchId) });
 }

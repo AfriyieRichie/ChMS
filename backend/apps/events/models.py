@@ -7,10 +7,19 @@ from apps.core.models import TimeStampedModel
 class Event(TimeStampedModel):
     class EventType(models.TextChoices):
         SERVICE = "service", _("Church Service")
-        SPECIAL = "special", _("Special Event")
+        CONFERENCE = "conference", _("Conference")
+        CLASS = "class", _("Class")
+        SOCIAL = "social", _("Social")
         OUTREACH = "outreach", _("Outreach")
         TRAINING = "training", _("Training")
         MEETING = "meeting", _("Meeting")
+
+    class Recurrence(models.TextChoices):
+        NONE = "", _("No recurrence")
+        DAILY = "daily", _("Daily")
+        WEEKLY = "weekly", _("Weekly")
+        BIWEEKLY = "biweekly", _("Every 2 weeks")
+        MONTHLY = "monthly", _("Monthly")
 
     branch = models.ForeignKey(
         "branches.Branch",
@@ -27,6 +36,13 @@ class Event(TimeStampedModel):
     end_datetime = models.DateTimeField(_("end"), null=True, blank=True)
     venue = models.CharField(_("venue"), max_length=200, blank=True)
     capacity = models.PositiveIntegerField(_("capacity"), null=True, blank=True)
+    cost = models.DecimalField(_("cost"), max_digits=10, decimal_places=2, null=True, blank=True)
+    registration_required = models.BooleanField(_("registration required"), default=False)
+    banner = models.ImageField(_("banner"), upload_to="events/banners/", null=True, blank=True)
+    recurrence = models.CharField(
+        _("recurrence"), max_length=20, choices=Recurrence.choices, blank=True, default="",
+    )
+    recurrence_end = models.DateField(_("recurrence end"), null=True, blank=True)
     is_published = models.BooleanField(_("published"), default=True)
     created_by = models.ForeignKey(
         "accounts.User",
@@ -52,9 +68,27 @@ class Event(TimeStampedModel):
         return self.registrations.exclude(status="cancelled").count()
 
 
+class VolunteerSlot(TimeStampedModel):
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name="volunteer_slots", verbose_name=_("event"),
+    )
+    role_name = models.CharField(_("role"), max_length=100)
+    slots_needed = models.PositiveSmallIntegerField(_("slots needed"), default=1)
+    notes = models.CharField(_("notes"), max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = _("volunteer slot")
+        verbose_name_plural = _("volunteer slots")
+        ordering = ["role_name"]
+
+    def __str__(self):
+        return f"{self.role_name} × {self.slots_needed} ({self.event.name})"
+
+
 class EventRegistration(TimeStampedModel):
     class Status(models.TextChoices):
         REGISTERED = "registered", _("Registered")
+        WAITLISTED = "waitlisted", _("Waitlisted")
         ATTENDED = "attended", _("Attended")
         CANCELLED = "cancelled", _("Cancelled")
 

@@ -1,17 +1,38 @@
 from rest_framework import serializers
 
-from .models import Group, GroupMembership
+from .models import Group, GroupMembership, GroupMeeting, GroupJoinRequest
+
+
+class GroupMeetingSerializer(serializers.ModelSerializer):
+    recorded_by_name = serializers.CharField(source="recorded_by.full_name", read_only=True)
+
+    class Meta:
+        model = GroupMeeting
+        fields = ["id", "group", "date", "present_count", "notes", "recorded_by_name", "created_at"]
+        read_only_fields = ["id", "recorded_by_name", "created_at"]
+
+
+class GroupJoinRequestSerializer(serializers.ModelSerializer):
+    member_name = serializers.CharField(source="member.full_name", read_only=True)
+    group_name = serializers.CharField(source="group.name", read_only=True)
+
+    class Meta:
+        model = GroupJoinRequest
+        fields = ["id", "group", "group_name", "member", "member_name", "status", "notes", "created_at"]
+        read_only_fields = ["id", "created_at"]
 
 
 class GroupSerializer(serializers.ModelSerializer):
     member_count = serializers.IntegerField(read_only=True)
     leader_name = serializers.CharField(source="leader.full_name", read_only=True)
+    parent_group_name = serializers.CharField(source="parent_group.name", read_only=True)
 
     class Meta:
         model = Group
         fields = [
             "id", "branch", "name", "group_type", "description",
             "leader", "leader_name",
+            "parent_group", "parent_group_name",
             "meeting_day", "meeting_time", "meeting_location",
             "is_active", "member_count",
             "created_at", "updated_at",
@@ -22,12 +43,15 @@ class GroupSerializer(serializers.ModelSerializer):
 class GroupListSerializer(serializers.ModelSerializer):
     member_count = serializers.IntegerField(read_only=True)
     leader_name = serializers.CharField(source="leader.full_name", read_only=True)
+    parent_group_name = serializers.CharField(source="parent_group.name", read_only=True)
 
     class Meta:
         model = Group
         fields = [
             "id", "name", "group_type", "leader_name",
-            "meeting_day", "meeting_location", "is_active", "member_count",
+            "parent_group", "parent_group_name",
+            "meeting_day", "meeting_time", "meeting_location",
+            "is_active", "member_count",
         ]
 
 

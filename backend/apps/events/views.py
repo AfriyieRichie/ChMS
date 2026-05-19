@@ -7,8 +7,11 @@ from rest_framework.response import Response
 from apps.accounts.permissions import make_capability_permission
 from apps.core.viewsets import BranchScopedViewSet
 
-from .models import Event, EventRegistration
-from .serializers import EventSerializer, EventListSerializer, EventRegistrationSerializer
+from .models import Event, EventRegistration, VolunteerSlot
+from .serializers import (
+    EventSerializer, EventListSerializer,
+    EventRegistrationSerializer, VolunteerSlotSerializer,
+)
 
 CanViewEvents = make_capability_permission("events.view")
 CanManageEvents = make_capability_permission("events.manage")
@@ -30,9 +33,13 @@ class EventViewSet(BranchScopedViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        event_type = self.request.query_params.get("event_type")
-        if event_type:
-            qs = qs.filter(event_type=event_type)
+        p = self.request.query_params
+        if p.get("event_type"):
+            qs = qs.filter(event_type=p["event_type"])
+        if p.get("date_from"):
+            qs = qs.filter(start_datetime__date__gte=p["date_from"])
+        if p.get("date_to"):
+            qs = qs.filter(start_datetime__date__lte=p["date_to"])
         return qs
 
     def perform_create(self, serializer):
@@ -55,10 +62,20 @@ class EventViewSet(BranchScopedViewSet):
 
         serializer = EventRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(event=event)
+
+        # Capacity check → auto-waitlist
+        reg_status = EventRegistration.Status.REGISTERED
+        if event.capacity:
+            active_count = event.registrations.exclude(
+                status__in=["cancelled", "waitlisted"]
+            ).count()
+            if active_count >= event.capacity:
+                reg_status = EventRegistration.Status.WAITLISTED
+
+        serializer.save(event=event, status=reg_status)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["post"], url_path="registrations/(?P<reg_pk>[^/.]+)/check-in")
+    @action(detail=True, methods=["post"], url_path=r"registrations/(?P<reg_pk>[^/.]+)/check-in")
     def check_in(self, request, pk=None, reg_pk=None):
         event = self.get_object()
         try:
@@ -68,3 +85,24 @@ class EventViewSet(BranchScopedViewSet):
         reg.status = EventRegistration.Status.ATTENDED
         reg.save(update_fields=["status"])
         return Response(EventRegistrationSerializer(reg).data)
+
+    @action(detail=True, methods=["get", "post"], url_path="volunteer-slots")
+    def volunteer_slots(self, request, pk=None):
+        event = self.get_object()
+        if request.method == "GET":
+            slots = event.volunteer_slots.all()
+            return Response(VolunteerSlotSerializer(slots, many=True).data)
+        serializer = VolunteerSlotSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(event=event)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["delete"], url_path=r"volunteer-slots/(?P<slot_pk>[^/.]+)")
+    def delete_volunteer_slot(self, request, pk=None, slot_pk=None):
+        event = self.get_object()
+        try:
+            slot = event.volunteer_slots.get(pk=slot_pk)
+        except VolunteerSlot.DoesNotExist:
+            return Response({"detail": "Slot not found."}, status=status.HTTP_404_NOT_FOUND)
+        slot.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -32,6 +32,10 @@ class Group(TimeStampedModel):
         related_name="led_groups",
         verbose_name=_("leader"),
     )
+    parent_group = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="child_groups", verbose_name=_("parent group"),
+    )
     meeting_day = models.CharField(_("meeting day"), max_length=20, blank=True)
     meeting_time = models.TimeField(_("meeting time"), null=True, blank=True)
     meeting_location = models.CharField(_("meeting location"), max_length=200, blank=True)
@@ -49,6 +53,56 @@ class Group(TimeStampedModel):
     @property
     def member_count(self):
         return self.memberships.filter(left_at__isnull=True).count()
+
+
+class GroupMeeting(TimeStampedModel):
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, related_name="meetings", verbose_name=_("group"),
+    )
+    date = models.DateField(_("date"))
+    present_count = models.PositiveSmallIntegerField(_("present count"), default=0)
+    notes = models.TextField(_("notes"), blank=True)
+    recorded_by = models.ForeignKey(
+        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="recorded_meetings", verbose_name=_("recorded by"),
+    )
+
+    class Meta:
+        verbose_name = _("group meeting")
+        verbose_name_plural = _("group meetings")
+        ordering = ["-date"]
+        unique_together = [("group", "date")]
+
+    def __str__(self):
+        return f"{self.group.name} – {self.date}"
+
+
+class GroupJoinRequest(TimeStampedModel):
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Pending")
+        APPROVED = "approved", _("Approved")
+        REJECTED = "rejected", _("Rejected")
+
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, related_name="join_requests", verbose_name=_("group"),
+    )
+    member = models.ForeignKey(
+        "members.Member", on_delete=models.CASCADE,
+        related_name="group_join_requests", verbose_name=_("member"),
+    )
+    status = models.CharField(
+        _("status"), max_length=20, choices=Status.choices, default=Status.PENDING,
+    )
+    notes = models.TextField(_("notes"), blank=True)
+
+    class Meta:
+        verbose_name = _("group join request")
+        verbose_name_plural = _("group join requests")
+        ordering = ["-created_at"]
+        unique_together = [("group", "member")]
+
+    def __str__(self):
+        return f"{self.member} → {self.group} ({self.status})"
 
 
 class GroupMembership(TimeStampedModel):

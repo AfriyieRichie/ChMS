@@ -111,6 +111,27 @@ class MemberViewSet(BranchScopedViewSet):
         serializer.save(member=member, branch=branch)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=["get"], url_path="attendance")
+    def attendance(self, request, pk=None):
+        member = self.get_object()
+        from apps.attendance.models import AttendanceEntry
+        entries = (
+            AttendanceEntry.objects
+            .filter(member=member)
+            .select_related("attendance_record", "attendance_record__service_type")
+            .order_by("-attendance_record__date")[:100]
+        )
+        return Response([
+            {
+                "id": e.id,
+                "date": str(e.attendance_record.date),
+                "service_type": e.attendance_record.service_type.name,
+                "attendance_type": e.attendance_record.attendance_type,
+                "is_first_visit": e.is_first_visit,
+            }
+            for e in entries
+        ])
+
     @action(detail=True, methods=["get"], url_path="groups")
     def groups(self, request, pk=None):
         member = self.get_object()

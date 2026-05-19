@@ -48,7 +48,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             );
           })}
         </nav>
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-gray-200 space-y-2">
+          <Link
+            href="/dashboard/profile"
+            className="block text-xs text-gray-500 hover:text-gray-700"
+          >
+            My Profile
+          </Link>
           <button
             onClick={() => { setAccessToken(null); window.location.href = "/login"; }}
             className="text-xs text-gray-500 hover:text-gray-700"

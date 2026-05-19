@@ -108,3 +108,18 @@ export async function getMemberGroups(id: number, branchId: number) {
   });
   return data;
 }
+
+export interface MemberAttendanceEntry {
+  id: number;
+  date: string;
+  service_type: string;
+  attendance_type: string;
+  is_first_visit: boolean;
+}
+
+export async function getMemberAttendance(id: number, branchId: number): Promise<MemberAttendanceEntry[]> {
+  const { data } = await api.get(`/api/v1/members/${id}/attendance/`, {
+    headers: { "X-Branch-Id": String(branchId) },
+  });
+  return data;
+}

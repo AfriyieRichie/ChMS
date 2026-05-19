@@ -67,16 +67,48 @@ export default function MembersPage() {
     },
   });
 
+  function exportCSV() {
+    if (!data?.results.length) return;
+    const rows = [
+      ["Name", "Email", "Phone", "Status", "Branch"],
+      ...data.results.map((m: Member) => [
+        m.full_name,
+        m.email || "",
+        m.phone || "",
+        m.membership_status,
+        m.primary_branch?.name || "",
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "members.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Members</h1>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-        >
-          {showForm ? "Cancel" : "Add Member"}
-        </button>
+        <div className="flex gap-2">
+          {data?.results.length ? (
+            <button
+              onClick={exportCSV}
+              className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
+            >
+              Export CSV
+            </button>
+          ) : null}
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+          >
+            {showForm ? "Cancel" : "Add Member"}
+          </button>
+        </div>
       </div>
 
       {showForm && (

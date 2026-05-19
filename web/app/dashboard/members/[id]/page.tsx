@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { getMember, updateMember, getMemberGroups, getMemberDiscipleship, type MemberDetail } from "@/lib/api/members";
+import { getMember, updateMember, getMemberGroups, getMemberDiscipleship, getMemberAttendance, type MemberDetail, type MemberAttendanceEntry } from "@/lib/api/members";
 import { getContributions } from "@/lib/api/finance";
 
 const BRANCH_ID = 1;
@@ -54,7 +54,7 @@ const editSchema = z.object({
 
 type EditValues = z.infer<typeof editSchema>;
 
-type Tab = "profile" | "giving" | "groups" | "discipleship";
+type Tab = "profile" | "giving" | "groups" | "discipleship" | "attendance";
 
 export default function MemberDetailPage() {
   const params = useParams();
@@ -85,6 +85,12 @@ export default function MemberDetailPage() {
     queryKey: ["member-discipleship", id, BRANCH_ID],
     queryFn: () => getMemberDiscipleship(id, BRANCH_ID),
     enabled: tab === "discipleship",
+  });
+
+  const { data: attendanceHistory } = useQuery({
+    queryKey: ["member-attendance", id, BRANCH_ID],
+    queryFn: () => getMemberAttendance(id, BRANCH_ID),
+    enabled: tab === "attendance",
   });
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<EditValues>({
@@ -148,7 +154,7 @@ export default function MemberDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">
-        {(["profile", "giving", "groups", "discipleship"] as Tab[]).map((t) => (
+        {(["profile", "giving", "groups", "discipleship", "attendance"] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-colors ${tab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
             {t}
@@ -319,6 +325,47 @@ export default function MemberDetailPage() {
               </span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Attendance tab */}
+      {tab === "attendance" && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">First Visit</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {!attendanceHistory && (
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+              )}
+              {attendanceHistory?.length === 0 && (
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">No attendance records found.</td></tr>
+              )}
+              {attendanceHistory?.map((e: MemberAttendanceEntry) => (
+                <tr key={e.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-sm text-gray-900">{e.date}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{e.service_type}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600 capitalize">{e.attendance_type}</td>
+                  <td className="px-4 py-3 text-center">
+                    {e.is_first_visit && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 font-medium">First Visit</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {attendanceHistory && attendanceHistory.length > 0 && (
+            <div className="px-4 py-2 border-t border-gray-100 text-xs text-gray-400">
+              Showing last {attendanceHistory.length} records
+            </div>
+          )}
         </div>
       )}
 

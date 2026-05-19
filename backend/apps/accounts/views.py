@@ -74,10 +74,34 @@ def password_reset_confirm(request):
     return Response({"detail": "Password reset successful. You can now sign in."})
 
 
-@api_view(["GET"])
+@api_view(["GET", "PATCH"])
 @permission_classes([IsAuthenticated])
 def me(request):
+    if request.method == "GET":
+        return Response(MeSerializer(request.user).data)
+    updatable = {k: v for k, v in request.data.items() if k in ("full_name", "phone")}
+    if not updatable:
+        return Response({"detail": "No updatable fields provided."}, status=400)
+    for field, val in updatable.items():
+        setattr(request.user, field, val)
+    request.user.save(update_fields=list(updatable.keys()))
     return Response(MeSerializer(request.user).data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    old_password = request.data.get("old_password", "")
+    new_password = request.data.get("new_password", "")
+    if not old_password or not new_password:
+        return Response({"detail": "old_password and new_password are required."}, status=400)
+    if not request.user.check_password(old_password):
+        return Response({"detail": "Current password is incorrect."}, status=400)
+    if len(new_password) < 8:
+        return Response({"detail": "Password must be at least 8 characters."}, status=400)
+    request.user.set_password(new_password)
+    request.user.save()
+    return Response({"detail": "Password changed successfully."})
 
 
 class RoleViewSet(viewsets.ReadOnlyModelViewSet):

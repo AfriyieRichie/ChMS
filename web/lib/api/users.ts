@@ -82,3 +82,15 @@ export async function removeRole(
 export async function deactivateUser(userId: number, branchId: number): Promise<void> {
   await api.delete(`/api/v1/users/${userId}/`, { headers: h(branchId) });
 }
+
+export async function updateMe(payload: { full_name?: string; phone?: string }): Promise<Me> {
+  const { data } = await api.patch("/api/v1/me/", payload);
+  return data;
+}
+
+export async function changePassword(oldPassword: string, newPassword: string): Promise<void> {
+  await api.post("/api/v1/change-password/", {
+    old_password: oldPassword,
+    new_password: newPassword,
+  });
+}

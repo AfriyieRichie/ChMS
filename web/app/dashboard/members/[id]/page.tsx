@@ -305,6 +305,8 @@ export default function MemberDetailPage() {
                 <option value="regular">Regular</option>
                 <option value="member">Member</option>
                 <option value="inactive">Inactive</option>
+                <option value="transferred">Transferred</option>
+                <option value="deceased">Deceased</option>
               </select>
             </FormField>
             <FormField label="Date Joined">

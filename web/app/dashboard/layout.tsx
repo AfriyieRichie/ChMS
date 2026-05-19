@@ -3,20 +3,37 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { setAccessToken } from "@/lib/api";
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  ClipboardCheck,
+  Wallet,
+  CalendarDays,
+  Users2,
+  Megaphone,
+  BarChart3,
+  ShieldCheck,
+  Home,
+  History,
+  UserCircle,
+  LogOut,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const NAV = [
-  { href: "/dashboard", label: "Overview", icon: "⊞" },
-  { href: "/dashboard/members", label: "Members", icon: "👥" },
-  { href: "/dashboard/branches", label: "Branches", icon: "🏛" },
-  { href: "/dashboard/attendance", label: "Attendance", icon: "📋" },
-  { href: "/dashboard/finance", label: "Finance", icon: "💰" },
-  { href: "/dashboard/events", label: "Events", icon: "📅" },
-  { href: "/dashboard/groups", label: "Groups", icon: "🫂" },
-  { href: "/dashboard/communications", label: "Comms", icon: "📣" },
-  { href: "/dashboard/reports", label: "Reports", icon: "📊" },
-  { href: "/dashboard/users", label: "Users", icon: "👤" },
-  { href: "/dashboard/households", label: "Households", icon: "🏠" },
-  { href: "/dashboard/audit-log", label: "Audit Log", icon: "📝" },
+const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
+  { href: "/dashboard", label: "Overview", Icon: LayoutDashboard },
+  { href: "/dashboard/members", label: "Members", Icon: Users },
+  { href: "/dashboard/branches", label: "Branches", Icon: Building2 },
+  { href: "/dashboard/attendance", label: "Attendance", Icon: ClipboardCheck },
+  { href: "/dashboard/finance", label: "Finance", Icon: Wallet },
+  { href: "/dashboard/events", label: "Events", Icon: CalendarDays },
+  { href: "/dashboard/groups", label: "Groups", Icon: Users2 },
+  { href: "/dashboard/communications", label: "Comms", Icon: Megaphone },
+  { href: "/dashboard/reports", label: "Reports", Icon: BarChart3 },
+  { href: "/dashboard/users", label: "Users", Icon: ShieldCheck },
+  { href: "/dashboard/households", label: "Households", Icon: Home },
+  { href: "/dashboard/audit-log", label: "Audit Log", Icon: History },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -25,42 +42,63 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-56 bg-white border-r border-gray-200 flex flex-col shrink-0">
-        <div className="px-5 py-4 border-b border-gray-200">
-          <span className="font-bold text-lg text-gray-900">
-            {process.env.NEXT_PUBLIC_APP_NAME ?? "ChMS"}
-          </span>
+      <aside className="w-60 bg-slate-900 flex flex-col shrink-0">
+        {/* Logo */}
+        <div className="px-5 py-4 border-b border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+              <span className="text-white text-xs font-bold">C</span>
+            </div>
+            <span className="font-semibold text-white text-sm tracking-tight">
+              {process.env.NEXT_PUBLIC_APP_NAME ?? "ChMS"}
+            </span>
+          </div>
         </div>
-        <nav className="flex-1 py-4 px-3 space-y-0.5">
-          {NAV.map(({ href, label, icon }) => {
-            const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+
+        {/* Nav */}
+        <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
+          {NAV.map(({ href, label, Icon }) => {
+            const active =
+              pathname === href ||
+              (href !== "/dashboard" && pathname.startsWith(href));
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   active
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
-                <span className="text-base">{icon}</span>
+                <Icon size={16} className="shrink-0" />
                 {label}
               </Link>
             );
           })}
         </nav>
-        <div className="p-4 border-t border-gray-200 space-y-2">
+
+        {/* Bottom actions */}
+        <div className="p-3 border-t border-slate-800 space-y-0.5">
           <Link
             href="/dashboard/profile"
-            className="block text-xs text-gray-500 hover:text-gray-700"
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              pathname === "/dashboard/profile"
+                ? "bg-blue-600 text-white"
+                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+            }`}
           >
+            <UserCircle size={16} className="shrink-0" />
             My Profile
           </Link>
           <button
-            onClick={() => { setAccessToken(null); window.location.href = "/login"; }}
-            className="text-xs text-gray-500 hover:text-gray-700"
+            onClick={() => {
+              setAccessToken(null);
+              window.location.href = "/login";
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
           >
+            <LogOut size={16} className="shrink-0" />
             Sign out
           </button>
         </div>

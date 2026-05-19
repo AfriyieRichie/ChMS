@@ -6,7 +6,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Download, Plus, X } from "lucide-react";
 import { getMembers, createMember, type Member } from "@/lib/api/members";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 const addMemberSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -18,20 +22,17 @@ const addMemberSchema = z.object({
 });
 type AddMemberValues = z.infer<typeof addMemberSchema>;
 
-const BRANCH_ID = 1; // TODO: read from auth context / cookie
+const BRANCH_ID = 1;
 
-const STATUS_LABELS: Record<string, string> = {
-  visitor: "Visitor",
-  regular: "Regular",
-  member: "Member",
-  inactive: "Inactive",
-};
+const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white";
 
-const STATUS_COLORS: Record<string, string> = {
-  visitor: "bg-yellow-100 text-yellow-800",
-  regular: "bg-blue-100 text-blue-800",
-  member: "bg-green-100 text-green-800",
-  inactive: "bg-gray-100 text-gray-600",
+type StatusVariant = "warning" | "info" | "success" | "default";
+
+const STATUS_CONFIG: Record<string, { label: string; variant: StatusVariant }> = {
+  visitor: { label: "Visitor", variant: "warning" },
+  regular: { label: "Regular", variant: "info" },
+  member: { label: "Member", variant: "success" },
+  inactive: { label: "Inactive", variant: "default" },
 };
 
 export default function MembersPage() {
@@ -59,7 +60,10 @@ export default function MembersPage() {
 
   const addMutation = useMutation({
     mutationFn: (d: AddMemberValues) =>
-      createMember({ ...d, full_name: `${d.first_name} ${d.last_name}`, email: d.email || undefined }, BRANCH_ID),
+      createMember(
+        { ...d, full_name: `${d.first_name} ${d.last_name}`, email: d.email || undefined },
+        BRANCH_ID
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["members", BRANCH_ID] });
       setShowForm(false);
@@ -79,7 +83,9 @@ export default function MembersPage() {
         m.primary_branch?.name || "",
       ]),
     ];
-    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csv = rows
+      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -91,48 +97,46 @@ export default function MembersPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Members</h1>
-        <div className="flex gap-2">
-          {data?.results.length ? (
-            <button
-              onClick={exportCSV}
-              className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
-            >
-              Export CSV
-            </button>
-          ) : null}
-          <button
-            onClick={() => setShowForm((v) => !v)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-          >
-            {showForm ? "Cancel" : "Add Member"}
-          </button>
-        </div>
-      </div>
+      <PageHeader title="Members" description="Manage your congregation members.">
+        {data?.results.length ? (
+          <Button variant="outline" size="sm" onClick={exportCSV}>
+            <Download size={14} />
+            Export CSV
+          </Button>
+        ) : null}
+        <Button
+          size="sm"
+          onClick={() => setShowForm((v) => !v)}
+        >
+          {showForm ? <X size={14} /> : <Plus size={14} />}
+          {showForm ? "Cancel" : "Add Member"}
+        </Button>
+      </PageHeader>
 
       {showForm && (
         <form
           onSubmit={handleSubmit((d) => addMutation.mutate(d))}
           className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4"
         >
-          <h2 className="font-semibold text-gray-800">New Member</h2>
+          <h2 className="font-semibold text-gray-900 text-sm">New Member</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">First Name *</label>
-              <input type="text" {...register("first_name")}
-                className="w-full border rounded-lg px-3 py-2 text-sm" />
-              {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
+              <input type="text" {...register("first_name")} className={FIELD} />
+              {errors.first_name && (
+                <p className="text-xs text-red-500">{errors.first_name.message}</p>
+              )}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Last Name *</label>
-              <input type="text" {...register("last_name")}
-                className="w-full border rounded-lg px-3 py-2 text-sm" />
-              {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
+              <input type="text" {...register("last_name")} className={FIELD} />
+              {errors.last_name && (
+                <p className="text-xs text-red-500">{errors.last_name.message}</p>
+              )}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Gender *</label>
-              <select {...register("gender")} className="w-full border rounded-lg px-3 py-2 text-sm">
+              <select {...register("gender")} className={FIELD}>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
@@ -140,7 +144,7 @@ export default function MembersPage() {
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Status *</label>
-              <select {...register("membership_status")} className="w-full border rounded-lg px-3 py-2 text-sm">
+              <select {...register("membership_status")} className={FIELD}>
                 <option value="visitor">Visitor</option>
                 <option value="regular">Regular</option>
                 <option value="member">Member</option>
@@ -148,23 +152,22 @@ export default function MembersPage() {
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Phone</label>
-              <input type="tel" {...register("phone")}
-                className="w-full border rounded-lg px-3 py-2 text-sm" />
+              <input type="tel" {...register("phone")} className={FIELD} />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Email</label>
-              <input type="email" {...register("email")}
-                className="w-full border rounded-lg px-3 py-2 text-sm" />
-              {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+              <input type="email" {...register("email")} className={FIELD} />
+              {errors.email && (
+                <p className="text-xs text-red-500">{errors.email.message}</p>
+              )}
             </div>
           </div>
-          <div className="flex gap-3">
-            <button type="submit" disabled={addMutation.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-              {addMutation.isPending ? "Saving..." : "Save Member"}
-            </button>
+          <div className="flex items-center gap-3">
+            <Button type="submit" size="sm" disabled={addMutation.isPending}>
+              {addMutation.isPending ? "Saving…" : "Save Member"}
+            </Button>
             {addMutation.isError && (
-              <p className="text-red-500 text-sm self-center">Failed to create member.</p>
+              <p className="text-red-500 text-sm">Failed to create member.</p>
             )}
           </div>
         </form>
@@ -174,18 +177,18 @@ export default function MembersPage() {
       <div className="flex gap-3">
         <input
           type="search"
-          placeholder="Search by name, phone or email..."
+          placeholder="Search by name, phone or email…"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white"
         />
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white"
         >
           <option value="">All statuses</option>
-          {Object.entries(STATUS_LABELS).map(([value, label]) => (
+          {Object.entries(STATUS_CONFIG).map(([value, { label }]) => (
             <option key={value} value={value}>{label}</option>
           ))}
         </select>
@@ -194,66 +197,89 @@ export default function MembersPage() {
       {/* Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-500">Loading members...</div>
+          <div className="p-10 text-center text-gray-400 text-sm">Loading members…</div>
         ) : isError ? (
-          <div className="p-8 text-center text-red-500">Failed to load members.</div>
+          <div className="p-10 text-center text-red-500 text-sm">Failed to load members.</div>
         ) : (
           <>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Phone</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Branch</th>
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Phone
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Email
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Branch
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-50">
                 {data?.results.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">No members found.</td>
+                    <td colSpan={5} className="px-4 py-10 text-center text-gray-400 text-sm">
+                      No members found.
+                    </td>
                   </tr>
                 )}
-                {data?.results.map((m: Member) => (
-                  <tr key={m.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-blue-700">
-                      <Link href={`/dashboard/members/${m.id}`} className="hover:underline">{m.full_name}</Link>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{m.phone || "—"}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{m.email || "—"}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[m.membership_status] ?? "bg-gray-100 text-gray-600"}`}>
-                        {STATUS_LABELS[m.membership_status] ?? m.membership_status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {m.primary_branch?.name ?? "—"}
-                    </td>
-                  </tr>
-                ))}
+                {data?.results.map((m: Member) => {
+                  const status = STATUS_CONFIG[m.membership_status];
+                  return (
+                    <tr key={m.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm font-medium">
+                        <Link
+                          href={`/dashboard/members/${m.id}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {m.full_name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">{m.phone || "—"}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500">{m.email || "—"}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant={status?.variant ?? "default"}>
+                          {status?.label ?? m.membership_status}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {m.primary_branch?.name ?? "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
 
-            {/* Pagination */}
             {data && data.count > 0 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 text-sm text-gray-600">
-                <span>{data.count} total</span>
+              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-600">
+                <span className="text-gray-500">
+                  {data.count} {data.count === 1 ? "member" : "members"}
+                </span>
                 <div className="flex gap-2">
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={!data.previous}
-                    className="px-3 py-1 border rounded disabled:opacity-40"
                   >
                     Previous
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setPage((p) => p + 1)}
                     disabled={!data.next}
-                    className="px-3 py-1 border rounded disabled:opacity-40"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

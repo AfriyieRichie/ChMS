@@ -1,16 +1,27 @@
 from rest_framework import serializers
-from .models import User, Role, UserRoleAssignment
+from .models import User, Role, Capability, UserRoleAssignment
+
+
+class CapabilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Capability
+        fields = ["codename", "description"]
 
 
 class RoleSerializer(serializers.ModelSerializer):
+    capabilities = serializers.SerializerMethodField()
+
     class Meta:
         model = Role
-        fields = ["id", "name", "description"]
+        fields = ["id", "name", "description", "capabilities"]
+
+    def get_capabilities(self, obj):
+        return list(obj.role_capabilities.values_list("capability__codename", flat=True))
 
 
 class UserRoleAssignmentSerializer(serializers.ModelSerializer):
     role_name = serializers.CharField(source="role.name", read_only=True)
-    branch_name = serializers.CharField(source="branch.name", read_only=True)
+    branch_name = serializers.CharField(source="branch.name", read_only=True, default=None)
 
     class Meta:
         model = UserRoleAssignment
@@ -25,23 +36,20 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "id", "email", "full_name", "phone",
-            "is_active", "is_network_admin", "date_joined",
+            "is_active", "is_network_admin", "date_joined", "last_login",
             "role_assignments",
         ]
-        read_only_fields = ["id", "date_joined", "is_network_admin", "role_assignments"]
+        read_only_fields = ["id", "date_joined", "last_login", "is_network_admin", "role_assignments"]
 
 
-class CreateUserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
-
+class InviteUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["email", "full_name", "phone", "password"]
+        fields = ["email", "full_name", "phone"]
 
     def create(self, validated_data):
-        password = validated_data.pop("password")
         user = User(**validated_data)
-        user.set_password(password)
+        user.set_unusable_password()
         user.save()
         return user
 

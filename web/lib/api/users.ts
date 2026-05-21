@@ -16,6 +16,7 @@ export interface User {
   is_active: boolean;
   is_network_admin: boolean;
   date_joined: string;
+  last_login: string | null;
   role_assignments: UserRoleAssignment[];
 }
 
@@ -23,6 +24,7 @@ export interface Role {
   id: number;
   name: string;
   description: string;
+  capabilities: string[];
 }
 
 export interface Me {
@@ -31,6 +33,16 @@ export interface Me {
   full_name: string;
   is_network_admin: boolean;
   role_assignments: UserRoleAssignment[];
+}
+
+export interface UserCapability {
+  codename: string;
+  description: string;
+}
+
+export interface UserCapabilities {
+  all_capabilities: UserCapability[];
+  by_role: { role: string; branch: string | null; capabilities: string[] }[];
 }
 
 const h = (branchId: number) => ({ "X-Branch-Id": String(branchId) });
@@ -45,8 +57,8 @@ export async function getUsers(branchId: number): Promise<User[]> {
   return Array.isArray(data) ? data : data.results ?? [];
 }
 
-export async function createUser(
-  payload: { email: string; full_name: string; phone?: string; password: string },
+export async function inviteUser(
+  payload: { email: string; full_name: string; phone?: string },
   branchId: number
 ): Promise<User> {
   const { data } = await api.post("/api/v1/users/", payload, { headers: h(branchId) });
@@ -61,11 +73,12 @@ export async function getRoles(): Promise<Role[]> {
 export async function assignRole(
   userId: number,
   roleId: number,
-  branchId: number
+  branchId: number,
+  targetBranchId?: number | null
 ): Promise<UserRoleAssignment> {
   const { data } = await api.post(
     `/api/v1/users/${userId}/assign-role/`,
-    { role: roleId, branch: branchId },
+    { role: roleId, branch: targetBranchId ?? null },
     { headers: h(branchId) }
   );
   return data;
@@ -81,6 +94,20 @@ export async function removeRole(
 
 export async function deactivateUser(userId: number, branchId: number): Promise<void> {
   await api.delete(`/api/v1/users/${userId}/`, { headers: h(branchId) });
+}
+
+export async function sendPasswordReset(userId: number, branchId: number): Promise<void> {
+  await api.post(`/api/v1/users/${userId}/send-reset/`, {}, { headers: h(branchId) });
+}
+
+export async function getUserCapabilities(
+  userId: number,
+  branchId: number
+): Promise<UserCapabilities> {
+  const { data } = await api.get(`/api/v1/users/${userId}/capabilities/`, {
+    headers: h(branchId),
+  });
+  return data;
 }
 
 export async function updateMe(payload: { full_name?: string; phone?: string }): Promise<Me> {

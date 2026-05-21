@@ -10,11 +10,11 @@ from rest_framework.response import Response
 
 from apps.branches.models import Branch
 
-from .models import User, Role, UserRoleAssignment
+from .models import User, Role, UserRoleAssignment, Capability
 from .permissions import make_capability_permission
 from .serializers import (
     UserSerializer,
-    CreateUserSerializer,
+    InviteUserSerializer,
     AssignRoleSerializer,
     RoleSerializer,
     MeSerializer,
@@ -64,14 +64,15 @@ def password_reset_confirm(request):
         return Response({"detail": "Password must be at least 8 characters."}, status=400)
     try:
         pk = force_str(urlsafe_base64_decode(uid))
-        user = User.objects.get(pk=pk, is_active=True)
+        user = User.objects.get(pk=pk)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         return Response({"detail": "Invalid reset link."}, status=400)
     if not default_token_generator.check_token(user, token):
         return Response({"detail": "Reset link is invalid or has expired."}, status=400)
     user.set_password(new_password)
+    user.is_active = True
     user.save()
-    return Response({"detail": "Password reset successful. You can now sign in."})
+    return Response({"detail": "Password set successfully. You can now sign in."})
 
 
 @api_view(["GET", "PATCH"])
@@ -105,7 +106,7 @@ def change_password(request):
 
 
 class RoleViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Role.objects.all().order_by("name")
+    queryset = Role.objects.prefetch_related("role_capabilities__capability").order_by("name")
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
 
@@ -114,8 +115,8 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [CanManageUsers]
 
     def get_serializer_class(self):
-        if self.action == "create":
-            return CreateUserSerializer
+        if self.action in ("create", "invite"):
+            return InviteUserSerializer
         return UserSerializer
 
     def get_queryset(self):
@@ -139,6 +140,13 @@ class UserViewSet(viewsets.ModelViewSet):
             )
         return User.objects.none()
 
+    def create(self, request, *args, **kwargs):
+        serializer = InviteUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        self._send_invite_email(user)
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
     def destroy(self, request, *args, **kwargs):
         from django.utils import timezone
         instance = self.get_object()
@@ -146,6 +154,74 @@ class UserViewSet(viewsets.ModelViewSet):
         instance.is_active = False
         instance.save(update_fields=["deleted_at", "is_active"])
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def _send_invite_email(self, user):
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000")
+        invite_url = f"{frontend_url}/set-password?uid={uid}&token={token}"
+        send_mail(
+            subject="You've been invited to ChMS",
+            message=(
+                f"Hi {user.full_name},\n\n"
+                f"You have been added to ChMS. Click the link below to set your password "
+                f"and activate your account:\n\n{invite_url}\n\n"
+                "This link expires in 24 hours. If you have any questions, "
+                "contact your branch administrator."
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+
+    @action(detail=True, methods=["post"], url_path="send-reset")
+    def send_reset(self, request, pk=None):
+        user = self.get_object()
+        if not user.is_active:
+            return Response({"detail": "Cannot reset password for an inactive user."}, status=400)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000")
+        reset_url = f"{frontend_url}/reset-password/confirm?uid={uid}&token={token}"
+        send_mail(
+            subject="Reset your ChMS password",
+            message=(
+                f"Hi {user.full_name},\n\n"
+                f"An administrator has requested a password reset for your account.\n\n"
+                f"Click the link below to set a new password:\n\n{reset_url}\n\n"
+                "This link expires in 24 hours."
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+        return Response({"detail": f"Password reset email sent to {user.email}."})
+
+    @action(detail=True, methods=["get"], url_path="capabilities")
+    def capabilities(self, request, pk=None):
+        user = self.get_object()
+        all_caps = list(
+            Capability.objects.filter(
+                role_capabilities__role__user_assignments__user=user
+            )
+            .distinct()
+            .order_by("codename")
+            .values("codename", "description")
+        )
+        by_role = []
+        for ra in (
+            user.role_assignments
+            .select_related("role", "branch")
+            .prefetch_related("role__role_capabilities__capability")
+        ):
+            by_role.append({
+                "role": ra.role.name,
+                "branch": ra.branch.name if ra.branch else None,
+                "capabilities": list(
+                    ra.role.role_capabilities.values_list("capability__codename", flat=True)
+                ),
+            })
+        return Response({"all_capabilities": all_caps, "by_role": by_role})
 
     @action(detail=True, methods=["post"], url_path="assign-role")
     def assign_role(self, request, pk=None):

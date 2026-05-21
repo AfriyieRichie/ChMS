@@ -15,6 +15,14 @@ class AuditLog(models.Model):
         related_name="audit_logs",
         verbose_name=_("actor"),
     )
+    branch = models.ForeignKey(
+        "branches.Branch",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="audit_logs",
+        verbose_name=_("branch"),
+    )
     action = models.CharField(_("action"), max_length=10, choices=Action.choices)
     object_type = models.CharField(_("object type"), max_length=100)
     object_id = models.PositiveBigIntegerField(_("object id"))
@@ -30,17 +38,27 @@ class AuditLog(models.Model):
         indexes = [
             models.Index(fields=["object_type", "object_id"]),
             models.Index(fields=["actor"]),
+            models.Index(fields=["branch"]),
+            models.Index(fields=["timestamp"]),
         ]
 
     def __str__(self):
         return f"{self.actor} {self.action} {self.object_type}:{self.object_id}"
 
 
-def log_action(actor, action, obj, before=None, after=None, request=None):
+def log_action(actor, action, obj, before=None, after=None, request=None, branch=None):
     ip = None
     if request:
         x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
         ip = x_forwarded.split(",")[0].strip() if x_forwarded else request.META.get("REMOTE_ADDR")
+        if branch is None:
+            branch_id = request.headers.get("X-Branch-Id")
+            if branch_id:
+                try:
+                    from apps.branches.models import Branch
+                    branch = Branch.objects.get(pk=branch_id)
+                except Exception:
+                    pass
     AuditLog.objects.create(
         actor=actor,
         action=action,
@@ -49,4 +67,5 @@ def log_action(actor, action, obj, before=None, after=None, request=None):
         before_data=before,
         after_data=after,
         ip_address=ip,
+        branch=branch,
     )

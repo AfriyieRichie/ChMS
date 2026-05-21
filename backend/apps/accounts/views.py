@@ -1,6 +1,9 @@
+import csv
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.http import HttpResponse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import viewsets, status
@@ -10,7 +13,7 @@ from rest_framework.response import Response
 
 from apps.branches.models import Branch
 
-from .models import User, Role, UserRoleAssignment, Capability
+from .models import User, Role, UserRoleAssignment, Capability, NotificationPreference
 from .permissions import make_capability_permission
 from .serializers import (
     UserSerializer,
@@ -18,6 +21,7 @@ from .serializers import (
     AssignRoleSerializer,
     RoleSerializer,
     MeSerializer,
+    NotificationPreferenceSerializer,
 )
 
 CanManageUsers = make_capability_permission("users.manage")
@@ -257,3 +261,141 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Assignment not found."}, status=status.HTTP_404_NOT_FOUND)
         assignment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ── Me – giving, attendance, groups, notifications ────────────────────────────
+
+def _member_or_none(user):
+    try:
+        return user.member_profile
+    except Exception:
+        return None
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me_notifications(request):
+    prefs, _ = NotificationPreference.objects.get_or_create(user=request.user)
+    return Response(NotificationPreferenceSerializer(prefs).data)
+
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def me_notifications_update(request):
+    prefs, _ = NotificationPreference.objects.get_or_create(user=request.user)
+    serializer = NotificationPreferenceSerializer(prefs, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me_giving(request):
+    member = _member_or_none(request.user)
+    if not member:
+        return Response({"has_member_profile": False, "results": []})
+
+    from apps.finance.models import Contribution
+    year = request.query_params.get("year")
+    qs = Contribution.objects.filter(
+        member=member, is_reversal=False
+    ).order_by("-given_at")
+    if year:
+        qs = qs.filter(given_at__year=year)
+
+    results = list(
+        qs.values(
+            "id", "receipt_number", "amount", "currency",
+            "given_at", "payment_method",
+            "fund__name", "category__name",
+        )
+    )
+    grand_total = sum(float(r["amount"]) for r in results)
+    return Response({
+        "has_member_profile": True,
+        "grand_total": grand_total,
+        "results": results,
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me_giving_statement(request):
+    member = _member_or_none(request.user)
+    if not member:
+        return Response({"detail": "No member profile linked to your account."}, status=404)
+
+    from apps.finance.models import Contribution
+    from datetime import date
+    year = request.query_params.get("year", str(date.today().year))
+
+    qs = Contribution.objects.filter(
+        member=member, is_reversal=False, given_at__year=year
+    ).order_by("given_at").values(
+        "receipt_number", "given_at", "fund__name", "category__name",
+        "amount", "currency", "payment_method",
+    )
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="giving-statement-{year}.csv"'
+    writer = csv.writer(response)
+    writer.writerow(["Receipt", "Date", "Fund", "Category", "Amount", "Currency", "Method"])
+    for c in qs:
+        writer.writerow([
+            c["receipt_number"], c["given_at"], c["fund__name"] or "",
+            c["category__name"] or "", c["amount"], c["currency"],
+            c["payment_method"],
+        ])
+    return response
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me_attendance(request):
+    member = _member_or_none(request.user)
+    if not member:
+        return Response({"has_member_profile": False, "results": []})
+
+    from apps.attendance.models import AttendanceEntry
+    entries = (
+        AttendanceEntry.objects.filter(member=member)
+        .select_related("attendance_record", "attendance_record__service_type", "attendance_record__branch")
+        .order_by("-attendance_record__date")[:200]
+    )
+    results = [
+        {
+            "date": e.attendance_record.date,
+            "service": e.attendance_record.service_type.name if e.attendance_record.service_type else None,
+            "branch": e.attendance_record.branch.name if e.attendance_record.branch else None,
+        }
+        for e in entries
+    ]
+    return Response({"has_member_profile": True, "results": results})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me_groups(request):
+    member = _member_or_none(request.user)
+    if not member:
+        return Response({"has_member_profile": False, "results": []})
+
+    from apps.groups.models import GroupMembership
+    memberships = (
+        GroupMembership.objects.filter(member=member)
+        .select_related("group")
+        .order_by("left_at", "-joined_at")
+    )
+    results = [
+        {
+            "group_id": m.group.id,
+            "group_name": m.group.name,
+            "group_type": m.group.type,
+            "joined_at": m.joined_at,
+            "left_at": m.left_at,
+            "is_active": m.left_at is None,
+        }
+        for m in memberships
+    ]
+    return Response({"has_member_profile": True, "results": results})

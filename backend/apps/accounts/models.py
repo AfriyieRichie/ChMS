@@ -100,6 +100,25 @@ class RoleCapability(models.Model):
         return f"{self.role} → {self.capability}"
 
 
+class NotificationPreference(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="notification_prefs"
+    )
+    email_attendance_reminders = models.BooleanField(default=True)
+    email_event_invites = models.BooleanField(default=True)
+    email_giving_receipts = models.BooleanField(default=True)
+    email_announcements = models.BooleanField(default=True)
+    email_pastoral_care = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("notification preference")
+        verbose_name_plural = _("notification preferences")
+
+    def __str__(self):
+        return f"{self.user} prefs"
+
+
 class UserRoleAssignment(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="role_assignments"

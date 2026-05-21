@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Role, Capability, UserRoleAssignment
+from .models import User, Role, Capability, UserRoleAssignment, NotificationPreference
 
 
 class CapabilitySerializer(serializers.ModelSerializer):
@@ -57,6 +57,20 @@ class InviteUserSerializer(serializers.ModelSerializer):
 class AssignRoleSerializer(serializers.Serializer):
     role = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all())
     branch = serializers.IntegerField(required=False, allow_null=True)
+
+
+class NotificationPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationPreference
+        fields = [
+            "email_attendance_reminders",
+            "email_event_invites",
+            "email_giving_receipts",
+            "email_announcements",
+            "email_pastoral_care",
+            "updated_at",
+        ]
+        read_only_fields = ["updated_at"]
 
 
 class MeSerializer(serializers.ModelSerializer):

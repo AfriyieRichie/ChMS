@@ -11,7 +11,6 @@ import {
   ArrowUpRight,
   UserPlus,
   Phone,
-  Gift,
   MapPin,
   Clock,
   TrendingUp,
@@ -38,37 +37,22 @@ const MONTH_NAMES = [
 
 // ── Stat card ────────────────────────────────────────────────────────────────
 
-type StatColor = "blue" | "emerald" | "amber" | "violet" | "rose";
-
-const COLOR_MAP: Record<StatColor, { bg: string; ring: string }> = {
-  blue:    { bg: "bg-blue-600",    ring: "ring-blue-100"    },
-  emerald: { bg: "bg-emerald-500", ring: "ring-emerald-100" },
-  amber:   { bg: "bg-amber-500",   ring: "ring-amber-100"   },
-  violet:  { bg: "bg-violet-500",  ring: "ring-violet-100"  },
-  rose:    { bg: "bg-rose-500",    ring: "ring-rose-100"    },
-};
-
 function StatCard({
-  label, value, sub, href, icon: Icon, color,
+  label, value, sub, href,
 }: {
-  label: string; value: string | number; sub?: string;
-  href: string; icon: LucideIcon; color: StatColor;
+  label: string; value: string | number; sub?: string; href: string;
 }) {
-  const c = COLOR_MAP[color];
   return (
     <Link
       href={href}
-      className="group block bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+      className="group block bg-white rounded-lg border border-gray-200 p-5 hover:border-gray-300 transition-colors"
     >
-      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-4 ring-4", c.bg, c.ring)}>
-        <Icon size={20} className="text-white" />
-      </div>
       <p className="text-3xl font-bold text-gray-900 tracking-tight leading-none">{value}</p>
-      <p className="text-sm text-gray-500 mt-2 font-medium">{label}</p>
+      <p className="text-sm text-gray-500 mt-2">{label}</p>
       {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
       <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-1">
-        <span className="text-xs text-blue-600 font-medium group-hover:underline">View all</span>
-        <ArrowUpRight size={12} className="text-blue-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+        <span className="text-xs text-gray-500 font-medium group-hover:text-gray-700 transition-colors">View all</span>
+        <ArrowUpRight size={11} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
       </div>
     </Link>
   );
@@ -86,9 +70,9 @@ function TrendBar({ total, firstTimers, maxTotal }: {
       className="w-full min-h-[3px] rounded-t-sm overflow-hidden flex flex-col-reverse"
       style={{ height: `${heightPct}%` }}
     >
-      <div className="bg-blue-500 w-full" style={{ flex: returning }} />
+      <div className="bg-neutral-800 w-full" style={{ flex: returning }} />
       {firstTimers > 0 && (
-        <div className="bg-emerald-400 w-full" style={{ flex: firstTimers }} />
+        <div className="bg-neutral-400 w-full" style={{ flex: firstTimers }} />
       )}
     </div>
   );
@@ -111,7 +95,7 @@ function AttendanceTrendChart({ data, loading }: { data: TrendPoint[]; loading: 
   if (!data.length) {
     return (
       <div className="h-36 flex flex-col items-center justify-center gap-2 text-gray-400">
-        <TrendingUp size={24} className="text-gray-200" />
+        <TrendingUp size={22} className="text-gray-200" />
         <p className="text-sm">No attendance data yet</p>
       </div>
     );
@@ -125,10 +109,10 @@ function AttendanceTrendChart({ data, loading }: { data: TrendPoint[]; loading: 
             key={i}
             className="flex-1 h-full flex flex-col justify-end relative group/bar"
           >
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover/bar:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
-              <span className="font-semibold">{d.total}</span>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover/bar:opacity-100 transition-opacity z-10 pointer-events-none">
+              <span className="font-medium">{d.total}</span>
               {d.first_timers > 0 && (
-                <span className="text-emerald-400 ml-1">· {d.first_timers} new</span>
+                <span className="text-gray-300 ml-1">· {d.first_timers} new</span>
               )}
             </div>
             <TrendBar total={d.total} firstTimers={d.first_timers} maxTotal={maxTotal} />
@@ -144,11 +128,11 @@ function AttendanceTrendChart({ data, loading }: { data: TrendPoint[]; loading: 
       </div>
       <div className="flex items-center gap-4 mt-3">
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-neutral-800" />
           <span className="text-xs text-gray-500">Attendance</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-neutral-400" />
           <span className="text-xs text-gray-500">First-timers</span>
         </div>
       </div>
@@ -170,7 +154,7 @@ function GivingBar({ label, value, maxValue, colorClass }: {
           {value.toLocaleString("en-GH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
         </span>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div
           className={cn("h-full rounded-full transition-all duration-700", colorClass)}
           style={{ width: `${pct}%` }}
@@ -195,7 +179,7 @@ function GivingComparison({
               <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
               <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
             </div>
-            <div className="h-2 bg-gray-100 rounded-full animate-pulse" />
+            <div className="h-1.5 bg-gray-100 rounded-full animate-pulse" />
           </div>
         ))}
       </div>
@@ -215,24 +199,24 @@ function GivingComparison({
         label={`${monthName} ${finance.year} (current)`}
         value={thisMonth}
         maxValue={maxVal}
-        colorClass="bg-blue-600"
+        colorClass="bg-neutral-800"
       />
       <GivingBar
         label={`${prevMonthName} ${prevMonthYear}`}
         value={lastMonth}
         maxValue={maxVal}
-        colorClass="bg-blue-300"
+        colorClass="bg-neutral-400"
       />
       <GivingBar
         label={`${monthName} ${finance.year - 1}`}
         value={lastYear}
         maxValue={maxVal}
-        colorClass="bg-gray-300"
+        colorClass="bg-gray-200"
       />
       {thisMonth > 0 && lastMonth > 0 && (
         <p className="text-xs text-gray-400 pt-1">
           {thisMonth >= lastMonth ? (
-            <span className="text-emerald-600 font-medium">
+            <span className="text-gray-700 font-medium">
               +{(((thisMonth - lastMonth) / lastMonth) * 100).toFixed(1)}%
             </span>
           ) : (
@@ -250,16 +234,16 @@ function GivingComparison({
 // ── First-timers widget ───────────────────────────────────────────────────────
 
 function FirstTimerRow({ person }: { person: FirstTimer }) {
-  const initials = person.full_name
+  const abbr = person.full_name
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
     .map((n) => n[0].toUpperCase())
     .join("");
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0">
-      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold shrink-0">
-        {initials}
+    <div className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-semibold shrink-0">
+        {abbr}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 truncate">{person.full_name}</p>
@@ -272,7 +256,7 @@ function FirstTimerRow({ person }: { person: FirstTimer }) {
       {person.phone ? (
         <a
           href={`tel:${person.phone}`}
-          className="shrink-0 inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium"
+          className="shrink-0 inline-flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900 font-medium"
         >
           <Phone size={11} />
           Call
@@ -286,14 +270,6 @@ function FirstTimerRow({ person }: { person: FirstTimer }) {
 
 // ── Upcoming events widget ────────────────────────────────────────────────────
 
-const EVENT_TYPE_COLORS: Record<string, string> = {
-  service:  "bg-blue-100 text-blue-700",
-  special:  "bg-purple-100 text-purple-700",
-  outreach: "bg-emerald-100 text-emerald-700",
-  training: "bg-orange-100 text-orange-700",
-  meeting:  "bg-gray-100 text-gray-600",
-};
-
 const EVENT_TYPE_LABELS: Record<string, string> = {
   service: "Service", special: "Special", outreach: "Outreach",
   training: "Training", meeting: "Meeting",
@@ -306,27 +282,26 @@ function UpcomingEventRow({ event }: { event: UpcomingEvent }) {
   const tomorrowStr = new Date(now.getTime() + 86_400_000).toDateString();
   const isToday = dt.toDateString() === todayStr;
   const isTomorrow = dt.toDateString() === tomorrowStr;
-  const colorClass = EVENT_TYPE_COLORS[event.event_type] ?? "bg-gray-100 text-gray-600";
 
   return (
-    <div className="flex gap-3 items-start py-3 border-b border-gray-50 last:border-0">
-      <div className="shrink-0 w-11 text-center bg-gray-50 rounded-lg py-1.5">
+    <div className="flex gap-3 items-start py-3 border-b border-gray-100 last:border-0">
+      <div className="shrink-0 w-11 text-center bg-gray-50 border border-gray-100 rounded py-1.5">
         <p className="text-[10px] text-gray-400 uppercase">{dt.toLocaleDateString("en-GH", { month: "short" })}</p>
         <p className="text-lg font-bold text-gray-900 leading-tight">{dt.getDate()}</p>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <span className={cn("inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-semibold", colorClass)}>
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
             {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
           </span>
           {isToday && (
-            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Today</span>
+            <span className="text-[10px] font-semibold text-gray-900 uppercase tracking-wide">Today</span>
           )}
           {isTomorrow && (
-            <span className="text-[10px] font-semibold text-gray-400">Tomorrow</span>
+            <span className="text-[10px] text-gray-400">Tomorrow</span>
           )}
         </div>
-        <p className="text-sm font-semibold text-gray-900 truncate">{event.name}</p>
+        <p className="text-sm font-medium text-gray-900 truncate">{event.name}</p>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="inline-flex items-center gap-1 text-xs text-gray-400">
             <Clock size={10} />
@@ -349,25 +324,24 @@ function UpcomingEventRow({ event }: { event: UpcomingEvent }) {
 function BirthdayRow({ person }: { person: BirthdayMember }) {
   const daysAway = person.days_away;
   const isToday = daysAway === 0;
-  const label = isToday ? "Today!" : daysAway === 1 ? "Tomorrow" : `In ${daysAway} day${daysAway !== 1 ? "s" : ""}`;
+  const label = isToday ? "Today" : daysAway === 1 ? "Tomorrow" : `In ${daysAway} days`;
   const dob = new Date(person.date_of_birth + "T00:00:00");
   const age = new Date().getFullYear() - dob.getFullYear();
 
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0">
-      <div className={cn(
-        "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-        isToday ? "bg-rose-100" : "bg-gray-100",
-      )}>
-        <Gift size={14} className={isToday ? "text-rose-500" : "text-gray-400"} />
+    <div className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+        <span className="text-xs font-semibold text-gray-500">
+          {person.full_name[0]?.toUpperCase()}
+        </span>
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 truncate">{person.full_name}</p>
         <p className="text-xs text-gray-400">Turns {age}</p>
       </div>
       <span className={cn(
-        "shrink-0 text-xs font-semibold",
-        isToday ? "text-rose-600" : "text-gray-400",
+        "shrink-0 text-xs font-medium",
+        isToday ? "text-gray-900" : "text-gray-400",
       )}>
         {label}
       </span>
@@ -380,10 +354,10 @@ function BirthdayRow({ person }: { person: BirthdayMember }) {
 function BranchComparisonTable({ data }: { data: BranchComparison[] }) {
   const maxMembers = Math.max(...data.map((b) => b.member_count), 1);
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white">
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
       <table className="min-w-full">
         <thead>
-          <tr className="bg-gray-50">
+          <tr className="bg-gray-50 border-b border-gray-200">
             <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Branch</th>
             <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Members</th>
             <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide w-36">Relative size</th>
@@ -391,7 +365,7 @@ function BranchComparisonTable({ data }: { data: BranchComparison[] }) {
             <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-gray-100">
           {data.map((b) => (
             <tr key={b.id} className="hover:bg-gray-50 transition-colors">
               <td className="px-5 py-3">
@@ -402,7 +376,7 @@ function BranchComparisonTable({ data }: { data: BranchComparison[] }) {
               <td className="px-5 py-3">
                 <div className="h-1.5 bg-gray-100 rounded-full w-36 overflow-hidden">
                   <div
-                    className="h-full bg-blue-500 rounded-full"
+                    className="h-full bg-neutral-700 rounded-full"
                     style={{ width: `${(b.member_count / maxMembers) * 100}%` }}
                   />
                 </div>
@@ -433,14 +407,14 @@ function SectionCard({
   className?: string;
 }) {
   return (
-    <div className={cn("bg-white rounded-2xl border border-gray-100 shadow-sm p-5", className)}>
+    <div className={cn("bg-white rounded-lg border border-gray-200 p-5", className)}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          {Icon && <Icon size={15} className="text-gray-400" />}
+          {Icon && <Icon size={14} className="text-gray-400" />}
           <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
         </div>
         {action && (
-          <Link href={action.href} className="text-xs text-blue-600 hover:underline font-medium">
+          <Link href={action.href} className="text-xs text-gray-500 hover:text-gray-800 font-medium transition-colors">
             {action.label} →
           </Link>
         )}
@@ -452,18 +426,15 @@ function SectionCard({
 
 // ── Quick action button ───────────────────────────────────────────────────────
 
-function QuickAction({ icon: Icon, label, href, colorClass }: {
-  icon: LucideIcon; label: string; href: string; colorClass: string;
+function QuickAction({ icon: Icon, label, href }: {
+  icon: LucideIcon; label: string; href: string;
 }) {
   return (
     <Link
       href={href}
-      className={cn(
-        "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-sm",
-        colorClass,
-      )}
+      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors"
     >
-      <Icon size={15} />
+      <Icon size={14} className="text-gray-500 shrink-0" />
       {label}
     </Link>
   );
@@ -474,7 +445,7 @@ function QuickAction({ icon: Icon, label, href, colorClass }: {
 function EmptyState({ icon: Icon, message }: { icon: LucideIcon; message: string }) {
   return (
     <div className="py-8 flex flex-col items-center gap-2 text-gray-400">
-      <Icon size={22} className="text-gray-200" />
+      <Icon size={20} className="text-gray-200" />
       <p className="text-sm">{message}</p>
     </div>
   );
@@ -508,37 +479,22 @@ export default function DashboardPage() {
     <div className="p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto">
 
       {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="flex items-start justify-between gap-4 flex-wrap pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{greeting}</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{greeting}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Here&apos;s what&apos;s happening at your church today.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <QuickAction
-            icon={ClipboardCheck}
-            label="Record Attendance"
-            href="/dashboard/attendance"
-            colorClass="bg-emerald-600 text-white"
-          />
-          <QuickAction
-            icon={UserPlus}
-            label="Add Member"
-            href="/dashboard/members"
-            colorClass="bg-blue-600 text-white"
-          />
-          <QuickAction
-            icon={Wallet}
-            label="Record Giving"
-            href="/dashboard/finance/contributions"
-            colorClass="bg-amber-500 text-white"
-          />
+          <QuickAction icon={ClipboardCheck} label="Record Attendance" href="/dashboard/attendance" />
+          <QuickAction icon={UserPlus} label="Add Member" href="/dashboard/members" />
+          <QuickAction icon={Wallet} label="Record Giving" href="/dashboard/finance/contributions" />
         </div>
       </div>
 
       {isError && (
-        <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-700">
           Could not load dashboard data. Make sure the backend is running and you are logged in.
         </div>
       )}
@@ -549,8 +505,6 @@ export default function DashboardPage() {
           label="Active Members"
           value={isLoading ? "—" : (data?.members.branch_total ?? 0)}
           href="/dashboard/members"
-          icon={Users}
-          color="blue"
         />
         <StatCard
           label="Last Attendance"
@@ -559,30 +513,22 @@ export default function DashboardPage() {
             ? new Date(data.attendance.last_date + "T00:00:00").toLocaleDateString("en-GH", { dateStyle: "medium" })
             : undefined}
           href="/dashboard/attendance"
-          icon={ClipboardCheck}
-          color="emerald"
         />
         <StatCard
           label="Monthly Giving"
           value={givingValue}
           sub={monthLabel || undefined}
           href="/dashboard/finance"
-          icon={Wallet}
-          color="amber"
         />
         <StatCard
           label="Upcoming Events"
           value={isLoading ? "—" : (data?.attendance.upcoming_events ?? 0)}
           href="/dashboard/events"
-          icon={CalendarDays}
-          color="violet"
         />
         <StatCard
           label="Active Groups"
           value={isLoading ? "—" : (data?.attendance.active_groups ?? 0)}
           href="/dashboard/groups"
-          icon={Users2}
-          color="rose"
         />
       </div>
 
@@ -653,7 +599,7 @@ export default function DashboardPage() {
             <div className="space-y-1">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex gap-3 py-3">
-                  <div className="w-11 h-11 bg-gray-100 rounded-lg animate-pulse shrink-0" />
+                  <div className="w-11 h-11 bg-gray-100 rounded animate-pulse shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="h-3 bg-gray-100 rounded animate-pulse w-3/4" />
                     <div className="h-2.5 bg-gray-100 rounded animate-pulse w-1/2" />
@@ -674,7 +620,7 @@ export default function DashboardPage() {
 
         <SectionCard
           title="Birthdays This Week"
-          icon={Gift}
+          icon={Users}
           action={{ label: "Members", href: "/dashboard/members" }}
         >
           {isLoading ? (
@@ -690,7 +636,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : data?.birthdays_week.length === 0 ? (
-            <EmptyState icon={Gift} message="No birthdays this week" />
+            <EmptyState icon={Users} message="No birthdays this week" />
           ) : (
             <div>
               {data?.birthdays_week.map((p) => (
@@ -705,7 +651,7 @@ export default function DashboardPage() {
       {data?.branch_comparison && data.branch_comparison.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <Building2 size={15} className="text-gray-400" />
+            <Building2 size={14} className="text-gray-400" />
             <h2 className="text-sm font-semibold text-gray-900">Branch Overview</h2>
           </div>
           <BranchComparisonTable data={data.branch_comparison} />
@@ -717,16 +663,16 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-gray-900">Active Announcements</h2>
-            <Link href="/dashboard/communications" className="text-xs text-blue-600 hover:underline font-medium">
+            <Link href="/dashboard/communications" className="text-xs text-gray-500 hover:text-gray-800 font-medium transition-colors">
               Manage →
             </Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {data.announcements.map((a) => (
-              <div key={a.id} className="bg-white rounded-2xl border border-gray-100 px-5 py-4 shadow-sm">
+              <div key={a.id} className="bg-white rounded-lg border border-gray-200 px-5 py-4">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <p className="text-sm font-semibold text-gray-900 leading-snug">{a.title}</p>
-                  <span className="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-600 capitalize">
+                  <span className="shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 capitalize">
                     {a.audience}
                   </span>
                 </div>

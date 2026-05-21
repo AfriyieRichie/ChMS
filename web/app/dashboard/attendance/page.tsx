@@ -83,7 +83,7 @@ function TrendChart({ records }: { records: AttendanceRecord[] }) {
       <div className="flex items-end gap-1.5 h-16">
         {weeks.map((w) => (
           <div key={w.label} className="flex-1 flex flex-col items-center gap-1" title={`${w.label}: ${w.total}`}>
-            <div className="w-full bg-blue-500 rounded-t-sm min-h-[4px]" style={{ height: `${w.pct}%` }} />
+            <div className="w-full bg-neutral-700 rounded-t-sm min-h-[4px]" style={{ height: `${w.pct}%` }} />
           </div>
         ))}
       </div>
@@ -135,7 +135,7 @@ function QRModal({ record, onClose }: { record: AttendanceRecord; onClose: () =>
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(checkInUrl)}`;
   return (
     <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-6 shadow-2xl max-w-xs w-full" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white rounded-xl p-6 shadow-xl max-w-xs w-full" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-900">Self Check-in QR</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
@@ -249,7 +249,7 @@ function EntriesPanel({ record, onClose }: { record: AttendanceRecord; onClose: 
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button onClick={() => setShowQR(true)} title="Self check-in QR code"
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors">
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors">
             <QrCode size={15} />
           </button>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -270,7 +270,7 @@ function EntriesPanel({ record, onClose }: { record: AttendanceRecord; onClose: 
             onClick={() => setTab(t)}
             className={cn(
               "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-colors",
-              tab === t ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700",
+              tab === t ? "text-gray-900 border-b-2 border-gray-900" : "text-gray-500 hover:text-gray-700",
             )}
           >
             <Icon size={13} /> {label}
@@ -305,12 +305,12 @@ function EntriesPanel({ record, onClose }: { record: AttendanceRecord; onClose: 
                     disabled={addMut.isPending || removeMut.isPending}
                     className={cn(
                       "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
-                      isPresent ? "bg-emerald-50 hover:bg-emerald-100" : "hover:bg-gray-50",
+                      isPresent ? "bg-gray-50 hover:bg-gray-100" : "hover:bg-gray-50",
                     )}
                   >
                     <div className={cn(
                       "w-6 h-6 rounded-full flex items-center justify-center shrink-0",
-                      isPresent ? "text-emerald-600" : "text-gray-300",
+                      isPresent ? "text-gray-700" : "text-gray-300",
                     )}>
                       {isPresent ? <CheckCircle size={18} /> : <Circle size={18} />}
                     </div>
@@ -389,10 +389,10 @@ function EntriesPanel({ record, onClose }: { record: AttendanceRecord; onClose: 
                     <button
                       onClick={() => followUpMut.mutate({ id: v.id, followed_up: !v.followed_up })}
                       className={cn(
-                        "text-xs px-2.5 py-1 rounded-full font-medium shrink-0 transition-colors",
+                        "text-xs px-2.5 py-1 rounded font-medium shrink-0 transition-colors",
                         v.followed_up
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-amber-100 text-amber-700 hover:bg-emerald-100 hover:text-emerald-700",
+                          ? "bg-gray-100 text-gray-600"
+                          : "bg-gray-50 border border-gray-200 text-gray-500 hover:bg-gray-100",
                       )}
                     >
                       {v.followed_up ? "Followed up ✓" : "Needs follow-up"}
@@ -532,7 +532,7 @@ function RecordForm({ serviceTypes, editing, onClose }: {
   }
 
   return (
-    <form onSubmit={submit} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+    <form onSubmit={submit} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-gray-900 text-sm">{editing ? "Edit Record" : "New Attendance Record"}</h2>
         <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
@@ -626,7 +626,7 @@ function ReportsTab() {
   return (
     <div className="space-y-6">
       {/* Pastoral care */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-gray-900 text-sm">Pastoral Care Prompt</h3>
@@ -659,7 +659,7 @@ function ReportsTab() {
               )}
               {absentData?.results.map((m: Member) => (
                 <div key={m.id} className="flex items-center gap-3 px-5 py-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold flex items-center justify-center shrink-0">
                     {m.full_name.split(" ").slice(0, 2).map((n) => n[0]).join("")}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -685,7 +685,7 @@ function ReportsTab() {
       </div>
 
       {/* Member attendance pattern */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
           <h3 className="font-semibold text-gray-900 text-sm">Member Attendance Pattern</h3>
           <p className="text-xs text-gray-400 mt-0.5">Search a member to view their attendance history</p>
@@ -694,7 +694,7 @@ function ReportsTab() {
           {selectedMember ? (
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
               <span className="text-sm text-blue-800 font-medium flex-1">{selectedMember.full_name}</span>
-              <button onClick={() => setSelectedMember(null)} className="text-blue-400 hover:text-blue-600">
+              <button onClick={() => setSelectedMember(null)} className="text-blue-400 hover:text-gray-700">
                 <X size={14} />
               </button>
             </div>
@@ -781,7 +781,7 @@ function ServiceTypesTab() {
   });
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 space-y-4">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 space-y-4">
       <h3 className="font-semibold text-gray-900 text-sm">Manage Service Types</h3>
       <div className="flex gap-2">
         <input
@@ -951,7 +951,7 @@ export default function AttendancePage() {
               className={cn(
                 "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors",
                 showFilters || activeFilterCount > 0
-                  ? "bg-blue-600 text-white border-blue-600"
+                  ? "bg-gray-900 text-white border-gray-900"
                   : "bg-white text-gray-600 border-gray-300 hover:border-gray-400",
               )}
             >
@@ -996,7 +996,7 @@ export default function AttendancePage() {
           )}
 
           {/* Records table */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
             {isLoading ? (
               <div className="divide-y divide-gray-50">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -1060,7 +1060,7 @@ export default function AttendancePage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => setEntriesRecord(r)}
-                              className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors" title="Roll call & visitors">
+                              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors" title="Roll call & visitors">
                               <UserCheck size={14} />
                             </button>
                             <button onClick={() => { setEditing(r); setShowForm(true); }}

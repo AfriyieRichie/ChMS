@@ -73,7 +73,7 @@ function ByMemberTab() {
         </span>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Loading…</div>
         ) : !data?.length ? (
@@ -140,7 +140,7 @@ function TopGiversTab() {
         </select>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Loading…</div>
         ) : !data?.length ? (
@@ -199,7 +199,7 @@ function LapsedTab() {
         {data && <span className="text-xs text-gray-400">{data.length} member{data.length !== 1 ? "s" : ""}</span>}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Loading…</div>
         ) : !data?.length ? (
@@ -217,7 +217,7 @@ function LapsedTab() {
               {data.map((r: LapsedGiver) => (
                 <tr key={r.member_id} className="hover:bg-gray-50">
                   <td className="px-4 py-2.5 text-sm font-medium text-gray-900">{r.member_name}</td>
-                  <td className="px-4 py-2.5 text-sm text-amber-600">{r.last_given ?? "—"}</td>
+                  <td className="px-4 py-2.5 text-sm text-gray-500">{r.last_given ?? "—"}</td>
                   <td className="px-4 py-2.5 text-sm text-gray-700 text-right">{fmt(r.total_given)}</td>
                 </tr>
               ))}
@@ -283,7 +283,7 @@ function PeriodsTab() {
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Loading…</div>
         ) : !periods?.length ? (
@@ -359,7 +359,7 @@ export default function FinanceReportsPage() {
             className={cn(
               "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px",
               tab === t.id
-                ? "border-blue-600 text-blue-700"
+                ? "border-gray-900 text-blue-700"
                 : "border-transparent text-gray-500 hover:text-gray-700",
             )}
           >

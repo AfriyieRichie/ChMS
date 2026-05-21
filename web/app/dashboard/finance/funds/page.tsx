@@ -73,7 +73,7 @@ export default function FundsPage() {
 
       {showForm && (
         <form onSubmit={handleSubmit((d) => createMut.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-gray-900 text-sm">New Fund</h2>
             <button type="button" onClick={() => { setShowForm(false); reset(); }}
@@ -113,7 +113,7 @@ export default function FundsPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white border border-gray-200 rounded-2xl p-4 animate-pulse space-y-2">
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse space-y-2">
                 <div className="h-4 bg-gray-100 rounded w-32" />
                 <div className="h-3 bg-gray-100 rounded w-24" />
               </div>
@@ -124,7 +124,7 @@ export default function FundsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {funds?.map((fund: Fund) => (
-              <div key={fund.id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-2">
+              <div key={fund.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h3 className="font-semibold text-gray-900">{fund.name}</h3>

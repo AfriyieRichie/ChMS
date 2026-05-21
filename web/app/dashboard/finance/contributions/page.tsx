@@ -124,13 +124,13 @@ function ReverseModal({ contribution, branchId, onClose }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900">Reverse Contribution</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
         </div>
         <div className="p-6 space-y-4">
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+          <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-600">
             <p className="font-medium">{contribution.member_name || "Anonymous"}</p>
             <p>{fmt(contribution.amount)} · {PM_LABEL[contribution.payment_method] ?? contribution.payment_method} · {fmtDate(contribution.given_at)}</p>
             <p className="text-xs mt-1 text-amber-600">Receipt: {contribution.receipt_number}</p>
@@ -290,7 +290,7 @@ export default function ContributionsPage() {
       {/* Record form */}
       {showForm && (
         <form onSubmit={handleSubmit((d) => mutation.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-gray-900 text-sm">New Contribution</h2>
             <button type="button" onClick={() => { setShowForm(false); setFormMember(null); reset(); }}
@@ -360,7 +360,7 @@ export default function ContributionsPage() {
           className={cn(
             "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors",
             showFilters || activeFilterCount > 0
-              ? "bg-blue-600 text-white border-blue-600"
+              ? "bg-gray-900 text-white border-gray-900"
               : "bg-white text-gray-600 border-gray-300 hover:border-gray-400",
           )}
         >
@@ -418,7 +418,7 @@ export default function ContributionsPage() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="divide-y divide-gray-50">
             {Array.from({ length: 7 }).map((_, i) => (
@@ -467,7 +467,7 @@ export default function ContributionsPage() {
                         <button
                           onClick={() => setReversing(c)}
                           title="Reverse this contribution"
-                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-amber-50 text-gray-400 hover:text-amber-600 transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
                         >
                           <RotateCcw size={14} />
                         </button>

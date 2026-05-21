@@ -74,7 +74,7 @@ function MemberAvatar({ name, size = "sm" }: { name: string; size?: "sm" | "md" 
   const initials = name.split(" ").filter(Boolean).slice(0, 2).map((n) => n[0].toUpperCase()).join("");
   return (
     <div className={cn(
-      "rounded-full bg-blue-100 text-blue-700 font-semibold flex items-center justify-center shrink-0",
+      "rounded-full bg-gray-100 text-gray-600 font-semibold flex items-center justify-center shrink-0",
       size === "sm" ? "w-7 h-7 text-xs" : "w-9 h-9 text-sm",
     )}>
       {initials}
@@ -108,7 +108,7 @@ function ImportModal({ onClose, branchId }: { onClose: () => void; branchId: num
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900">Import Members from CSV</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -168,11 +168,11 @@ function ImportModal({ onClose, branchId }: { onClose: () => void; branchId: num
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-green-50 rounded-xl p-4 text-center">
+                <div className="bg-gray-50 rounded p-4 text-center">
                   <p className="text-2xl font-bold text-green-700">{result.created}</p>
                   <p className="text-xs text-green-600 mt-0.5">Members created</p>
                 </div>
-                <div className="bg-amber-50 rounded-xl p-4 text-center">
+                <div className="bg-gray-50 rounded p-4 text-center">
                   <p className="text-2xl font-bold text-amber-700">{result.skipped}</p>
                   <p className="text-xs text-amber-600 mt-0.5">Skipped (duplicates)</p>
                 </div>
@@ -227,7 +227,7 @@ function BulkActionBar({
   });
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-lg shadow-2xl">
       <span className="text-sm font-semibold">{selectedIds.length} selected</span>
       <div className="w-px h-4 bg-white/20" />
 
@@ -483,7 +483,7 @@ function AddMemberForm({ onClose, branchId }: { onClose: () => void; branchId: n
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+    <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-gray-900 text-sm">New Member</h2>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -544,7 +544,7 @@ function AddMemberForm({ onClose, branchId }: { onClose: () => void; branchId: n
 
         {/* Duplicate warning */}
         {dupeChecked && duplicates.length > 0 && (
-          <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 space-y-2">
+          <div className="rounded bg-gray-50 border border-gray-200 p-3 space-y-2">
             <div className="flex items-center gap-2 text-amber-800">
               <AlertTriangle size={15} />
               <p className="text-sm font-semibold">Possible duplicates found</p>
@@ -717,7 +717,7 @@ export default function MembersPage() {
           className={cn(
             "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors",
             showFilters || activeFilterCount > 0
-              ? "bg-blue-600 text-white border-blue-600"
+              ? "bg-gray-900 text-white border-gray-900"
               : "bg-white text-gray-600 border-gray-300 hover:border-gray-400",
           )}
         >
@@ -742,7 +742,7 @@ export default function MembersPage() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="divide-y divide-gray-50">
             {Array.from({ length: 8 }).map((_, i) => (

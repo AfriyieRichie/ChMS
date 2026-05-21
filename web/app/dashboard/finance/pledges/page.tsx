@@ -95,7 +95,7 @@ function PledgeProgress({ pledge }: { pledge: Pledge }) {
     <div className="flex items-center gap-2 w-full">
       <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div
-          className={cn("h-full rounded-full transition-all", pct >= 100 ? "bg-emerald-500" : "bg-blue-500")}
+          className={cn("h-full rounded-full transition-all", pct >= 100 ? "bg-neutral-700" : "bg-neutral-600")}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -162,7 +162,7 @@ export default function PledgesPage() {
 
       {showForm && (
         <form onSubmit={handleSubmit((d) => mutation.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-gray-900 text-sm">New Pledge</h2>
             <button type="button" onClick={closeForm} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
@@ -232,7 +232,7 @@ export default function PledgesPage() {
             className={cn(
               "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
               statusFilter === s
-                ? "bg-blue-600 text-white border-blue-600"
+                ? "bg-gray-900 text-white border-gray-900"
                 : "bg-white text-gray-600 border-gray-200 hover:border-gray-300",
             )}
           >
@@ -241,7 +241,7 @@ export default function PledgesPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="divide-y divide-gray-50">
             {Array.from({ length: 5 }).map((_, i) => (

@@ -107,7 +107,7 @@ export default function ReconciliationPage() {
         {[
           { label: "Bank Deposits", value: fmt(depositTotal), color: "text-gray-900" },
           { label: "Contributions", value: fmt(contributionTotal), color: "text-gray-900" },
-          { label: "Variance", value: fmt(Math.abs(variance)), color: variance === 0 ? "text-emerald-600" : "text-red-600" },
+          { label: "Variance", value: fmt(Math.abs(variance)), color: variance === 0 ? "text-gray-600" : "text-red-600" },
           { label: "Reconciled", value: fmt(reconciledTotal), color: "text-blue-700" },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
@@ -118,7 +118,7 @@ export default function ReconciliationPage() {
       </div>
 
       {variance !== 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+        <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-500">
           Variance of {fmt(Math.abs(variance))} detected. Bank deposits {variance > 0 ? "exceed" : "are below"} recorded contributions.
         </div>
       )}
@@ -126,7 +126,7 @@ export default function ReconciliationPage() {
       {/* Add deposit form */}
       {showForm && (
         <form onSubmit={handleSubmit((d) => createMut.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <h2 className="font-semibold text-gray-900 text-sm">Record Bank Deposit</h2>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -164,7 +164,7 @@ export default function ReconciliationPage() {
         {/* Bank deposits */}
         <div>
           <h2 className="text-sm font-semibold text-gray-700 mb-3">Bank Deposits</h2>
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
             {monthDeposits.length === 0 ? (
               <p className="px-4 py-8 text-center text-sm text-gray-400">No deposits recorded.</p>
             ) : (
@@ -202,7 +202,7 @@ export default function ReconciliationPage() {
         {/* Posted batches */}
         <div>
           <h2 className="text-sm font-semibold text-gray-700 mb-3">Posted Batches (this period)</h2>
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
             {postedBatches.length === 0 ? (
               <p className="px-4 py-8 text-center text-sm text-gray-400">No posted batches this period.</p>
             ) : (

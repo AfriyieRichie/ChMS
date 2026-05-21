@@ -20,11 +20,11 @@ const BRANCH_ID = 1;
 const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white disabled:bg-gray-50";
 
 const STATUS_COLOR: Record<string, string> = {
-  member: "bg-emerald-100 text-emerald-700",
-  regular: "bg-blue-100 text-blue-700",
+  member: "bg-gray-100 text-gray-600",
+  regular: "bg-gray-100 text-gray-600",
   visitor: "bg-gray-100 text-gray-600",
   inactive: "bg-red-100 text-red-600",
-  transferred: "bg-purple-100 text-purple-700",
+  transferred: "bg-gray-100 text-gray-600",
   deceased: "bg-gray-200 text-gray-500",
 };
 
@@ -39,9 +39,9 @@ type HouseholdFormValues = z.infer<typeof householdSchema>;
 // ── Initials avatar ────────────────────────────────────────────────────────────
 
 const AVATAR_COLORS = [
-  "bg-blue-100 text-blue-700", "bg-purple-100 text-purple-700",
-  "bg-green-100 text-green-700", "bg-amber-100 text-amber-700",
-  "bg-rose-100 text-rose-700", "bg-cyan-100 text-cyan-700",
+  "bg-gray-100 text-gray-600", "bg-gray-100 text-gray-600",
+  "bg-green-100 text-green-700", "bg-gray-100 text-gray-500",
+  "bg-gray-100 text-gray-600", "bg-gray-100 text-gray-600",
 ];
 
 function Avatar({ name, id, photo, size = "md" }: { name: string; id: number; photo?: string | null; size?: "sm" | "md" | "lg" }) {
@@ -262,7 +262,7 @@ function HouseholdPanel({
           <h2 className="font-semibold text-gray-900 truncate">{household.name}</h2>
           {household.head_name && (
             <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-              <Crown size={10} className="text-amber-500" /> {household.head_name}
+              <Crown size={10} className="text-gray-500" /> {household.head_name}
             </p>
           )}
         </div>
@@ -343,7 +343,7 @@ function HouseholdPanel({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       <p className="text-sm text-gray-800 truncate">{m.full_name}</p>
-                      {isHead && <Crown size={11} className="text-amber-500 shrink-0" />}
+                      {isHead && <Crown size={11} className="text-gray-500 shrink-0" />}
                     </div>
                     <p className={cn("text-[10px] px-1.5 py-0.5 rounded-full inline-block mt-0.5", STATUS_COLOR[m.membership_status] ?? "bg-gray-100 text-gray-600")}>
                       {m.membership_status}
@@ -354,7 +354,7 @@ function HouseholdPanel({
                       <button
                         onClick={() => setHeadMut.mutate(m.id)}
                         title="Set as head of household"
-                        className="p-1 rounded hover:bg-amber-50 text-gray-300 hover:text-amber-500 transition-colors"
+                        className="p-1 rounded hover:bg-gray-100 text-gray-300 hover:text-gray-500 transition-colors"
                       >
                         <Crown size={13} />
                       </button>
@@ -492,7 +492,7 @@ export default function HouseholdsPage() {
       {showForm && (
         <form
           onSubmit={handleSubmit((d) => createMut.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4"
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4"
         >
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-gray-900 text-sm">New Household</h2>
@@ -534,7 +534,7 @@ export default function HouseholdsPage() {
       />
 
       {/* List */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
         {isLoading && (
           <div className="divide-y divide-gray-50">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -573,7 +573,7 @@ export default function HouseholdsPage() {
                   <p className="text-sm font-semibold text-gray-900 truncate">{hh.name}</p>
                   {hh.head_name && (
                     <p className="text-xs text-gray-400 flex items-center gap-0.5 shrink-0">
-                      <Crown size={10} className="text-amber-400" /> {hh.head_name}
+                      <Crown size={10} className="text-gray-500" /> {hh.head_name}
                     </p>
                   )}
                 </div>

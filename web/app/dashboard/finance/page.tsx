@@ -78,9 +78,9 @@ export default function FinancePage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {NAV_CARDS.map(({ label, href, Icon, desc }) => (
           <Link key={href} href={href}
-            className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 flex items-start gap-3">
+            className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-start gap-3">
             <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 shrink-0">
-              <Icon size={18} className="text-blue-600" />
+              <Icon size={18} className="text-gray-600" />
             </div>
             <div>
               <p className="font-semibold text-gray-900 text-sm">{label}</p>

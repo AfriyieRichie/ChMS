@@ -135,7 +135,7 @@ function AnnouncementsTab({ branchId }: { branchId: number }) {
 
       {showForm && (
         <form onSubmit={handleSubmit((d) => createMut.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <h3 className="font-semibold text-gray-900 text-sm">New Announcement</h3>
           <div className="space-y-1">
             <label className="text-xs font-medium text-gray-600">Title *</label>
@@ -174,13 +174,13 @@ function AnnouncementsTab({ branchId }: { branchId: number }) {
       )}
 
       {isLoading ? (
-        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="bg-white border border-gray-200 rounded-2xl h-20 animate-pulse" />)}</div>
+        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="bg-white border border-gray-200 rounded-lg h-20 animate-pulse" />)}</div>
       ) : data?.results.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center text-gray-400 text-sm">No announcements yet.</div>
+        <div className="bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-400 text-sm">No announcements yet.</div>
       ) : (
         <div className="space-y-3">
           {data?.results.map((a: Announcement) => (
-            <div key={a.id} className="bg-white rounded-2xl border border-gray-200 px-5 py-4 shadow-sm">
+            <div key={a.id} className="bg-white rounded-lg border border-gray-200 px-5 py-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -286,7 +286,7 @@ function TemplatesTab({ branchId }: { branchId: number }) {
         {[{ value: "", label: "All" }, ...TEMPLATE_CATEGORIES].map((c) => (
           <button key={c.value} onClick={() => setCategoryFilter(c.value)}
             className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors",
-              categoryFilter === c.value ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300")}>
+              categoryFilter === c.value ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300")}>
             {c.label}
           </button>
         ))}
@@ -296,7 +296,7 @@ function TemplatesTab({ branchId }: { branchId: number }) {
       {/* Form */}
       {showForm && (
         <form onSubmit={handleSubmit((d) => editing ? updateMut.mutate(d) : createMut.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-900 text-sm">{editing ? "Edit Template" : "New Template"}</h3>
             <button type="button" onClick={() => { setShowForm(false); setEditing(null); }}
@@ -357,11 +357,11 @@ function TemplatesTab({ branchId }: { branchId: number }) {
 
       {/* Template grid */}
       {templates.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center text-gray-400 text-sm">No templates yet.</div>
+        <div className="bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-400 text-sm">No templates yet.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {templates.map((t: MessageTemplate) => (
-            <div key={t.id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm group hover:shadow-md transition-all">
+            <div key={t.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm group hover:shadow-md transition-all">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 text-sm truncate">{t.name}</p>
@@ -395,7 +395,7 @@ function TemplatesTab({ branchId }: { branchId: number }) {
       {/* Preview modal */}
       {preview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setPreview(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg shadow-2xl p-6 max-w-lg w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">{preview.name}</h3>
               <button onClick={() => setPreview(null)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
@@ -486,7 +486,7 @@ function AudiencesTab({ branchId }: { branchId: number }) {
       </div>
 
       {showForm && (
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <h3 className="font-semibold text-gray-900 text-sm">Define Audience</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2 space-y-1">
@@ -500,7 +500,7 @@ function AudiencesTab({ branchId }: { branchId: number }) {
                 {STATUS_OPTIONS.map((s) => (
                   <label key={s} className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs cursor-pointer transition-colors capitalize",
-                    form.membership_status.includes(s) ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300",
+                    form.membership_status.includes(s) ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300",
                   )}>
                     <input type="checkbox" checked={form.membership_status.includes(s)} onChange={() => toggleStatus(s)} className="sr-only" />
                     {s.replace("_", " ")}
@@ -566,11 +566,11 @@ function AudiencesTab({ branchId }: { branchId: number }) {
       )}
 
       {audiences.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center text-gray-400 text-sm">No saved audiences yet.</div>
+        <div className="bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-400 text-sm">No saved audiences yet.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {audiences.map((a: Audience) => (
-            <div key={a.id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm group hover:shadow-md transition-all">
+            <div key={a.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm group hover:shadow-md transition-all">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 text-sm truncate">{a.name}</p>
@@ -582,9 +582,9 @@ function AudiencesTab({ branchId }: { branchId: number }) {
                 {a.filters.membership_status?.map((s) => (
                   <span key={s} className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded capitalize">{s.replace("_"," ")}</span>
                 ))}
-                {a.filters.gender && <span className="text-[10px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">{a.filters.gender === "M" ? "Male" : "Female"}</span>}
-                {a.filters.attended_in_days && <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded">Attended ≤{a.filters.attended_in_days}d</span>}
-                {a.filters.not_attended_in_days && <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded">Absent ≥{a.filters.not_attended_in_days}d</span>}
+                {a.filters.gender && <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{a.filters.gender === "M" ? "Male" : "Female"}</span>}
+                {a.filters.attended_in_days && <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">Attended ≤{a.filters.attended_in_days}d</span>}
+                {a.filters.not_attended_in_days && <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">Absent ≥{a.filters.not_attended_in_days}d</span>}
               </div>
               {/* Preview result */}
               {previewId === a.id && previewData && (
@@ -677,7 +677,7 @@ function CampaignsTab({ branchId }: { branchId: number }) {
 
       {showComposer && (
         <form onSubmit={handleSubmit((d) => createMut.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <h3 className="font-semibold text-gray-900 text-sm">Campaign Composer</h3>
 
           <div className="grid grid-cols-2 gap-3">
@@ -736,11 +736,11 @@ function CampaignsTab({ branchId }: { branchId: number }) {
 
       {/* Campaign list */}
       {isLoading ? (
-        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="bg-white border border-gray-200 rounded-2xl h-20 animate-pulse" />)}</div>
+        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="bg-white border border-gray-200 rounded-lg h-20 animate-pulse" />)}</div>
       ) : campaigns.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center text-gray-400 text-sm">No campaigns yet.</div>
+        <div className="bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-400 text-sm">No campaigns yet.</div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
           <table className="min-w-full divide-y divide-gray-100">
             <thead>
               <tr className="bg-gray-50">
@@ -777,12 +777,12 @@ function CampaignsTab({ branchId }: { branchId: number }) {
                           onClick={() => { if (confirm("Send this campaign now?")) sendMut.mutate(c.id); }}
                           disabled={sendMut.isPending}
                           title="Send now"
-                          className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-50">
+                          className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 transition-colors disabled:opacity-50">
                           <Send size={11} /> Send
                         </button>
                         {!scheduleMode ? (
                           <button onClick={() => setScheduleMode(true)} title="Schedule"
-                            className="p-1.5 rounded-lg hover:bg-amber-50 text-gray-400 hover:text-amber-600 transition-colors">
+                            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                             <Clock size={14} />
                           </button>
                         ) : (
@@ -864,12 +864,12 @@ function LogTab({ branchId }: { branchId: number }) {
       </div>
 
       {isLoading ? (
-        <div className="bg-white border border-gray-200 rounded-2xl h-40 animate-pulse" />
+        <div className="bg-white border border-gray-200 rounded-lg h-40 animate-pulse" />
       ) : logs.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center text-gray-400 text-sm">No messages logged yet.</div>
+        <div className="bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-400 text-sm">No messages logged yet.</div>
       ) : (
         <>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
             <table className="min-w-full divide-y divide-gray-100">
               <thead>
                 <tr className="bg-gray-50">

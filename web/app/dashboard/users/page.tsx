@@ -399,7 +399,7 @@ export default function UsersPage() {
       )}
 
       {/* User table */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         {isLoading ? (
           <p className="px-4 py-8 text-center text-gray-400 text-sm">Loading users…</p>
         ) : !users?.length ? (
@@ -433,7 +433,7 @@ export default function UsersPage() {
                   <td className="px-4 py-3 hidden md:table-cell">
                     <div className="flex flex-wrap gap-1">
                       {u.is_network_admin && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">
                           Network Admin
                         </span>
                       )}

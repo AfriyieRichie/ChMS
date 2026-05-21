@@ -121,7 +121,7 @@ function EventForm({ branchId, editing, onClose }: {
 
   return (
     <form onSubmit={handleSubmit((d) => editing ? updateMut.mutate(d) : createMut.mutate(d))}
-      className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+      className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-gray-900 text-sm">{editing ? "Edit Event" : "New Event"}</h2>
         <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
@@ -218,8 +218,8 @@ function UpcomingCard({ event, onEdit, onDetails }: {
   const isFull = event.capacity !== null && event.registration_count >= event.capacity;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 flex gap-4 group">
-      <div className="shrink-0 w-14 h-14 rounded-xl bg-blue-600 flex flex-col items-center justify-center text-white">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex gap-4 group">
+      <div className="shrink-0 w-14 h-14 rounded border border-gray-200 bg-gray-50 flex flex-col items-center justify-center text-gray-800">
         <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{MONTH_NAMES[d.getMonth()]}</span>
         <span className="text-2xl font-bold leading-none">{d.getDate()}</span>
       </div>
@@ -230,7 +230,7 @@ function UpcomingCard({ event, onEdit, onDetails }: {
             <button onClick={onEdit} className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors">
               <Pencil size={13} />
             </button>
-            <button onClick={onDetails} className="p-1 rounded hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors">
+            <button onClick={onDetails} className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
               <Users size={13} />
             </button>
           </div>
@@ -248,7 +248,7 @@ function UpcomingCard({ event, onEdit, onDetails }: {
           onClick={onDetails}
           className={cn(
             "mt-2 text-xs font-medium px-2 py-0.5 rounded-full border transition-colors",
-            isFull ? "border-red-200 text-red-600 bg-red-50" : "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100",
+            isFull ? "border-red-200 text-red-600 bg-red-50" : "border-gray-200 text-gray-600 bg-gray-50 hover:bg-gray-100",
           )}
         >
           <span className="flex items-center gap-1">
@@ -295,7 +295,7 @@ function CalendarView({ events, onEventClick }: { events: Event[]; onEventClick:
   while (cells.length % 7 !== 0) cells.push(null);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
         <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
@@ -328,7 +328,7 @@ function CalendarView({ events, onEventClick }: { events: Event[]; onEventClick:
                 <>
                   <span className={cn(
                     "text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full mb-1",
-                    isToday ? "bg-blue-600 text-white" : "text-gray-600",
+                    isToday ? "bg-gray-900 text-white" : "text-gray-600",
                   )}>{day}</span>
                   <div className="space-y-0.5">
                     {dayEvents.slice(0, 3).map((ev) => (
@@ -440,7 +440,7 @@ function EventPanel({ event, branchId, onClose }: {
           <button key={t.key} onClick={() => setTab(t.key)}
             className={cn(
               "py-2.5 px-3 text-sm font-medium border-b-2 transition-colors -mb-px",
-              tab === t.key ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700",
+              tab === t.key ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700",
             )}>
             {t.label}
           </button>
@@ -491,7 +491,7 @@ function EventPanel({ event, branchId, onClose }: {
                 {reg.status === "registered" && (
                   <button onClick={() => checkInMut.mutate(reg.id)} disabled={checkInMut.isPending}
                     title="Mark as attended"
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-emerald-50 text-gray-400 hover:text-emerald-600 transition-all">
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all">
                     <CheckCircle size={15} />
                   </button>
                 )}
@@ -529,7 +529,7 @@ function EventPanel({ event, branchId, onClose }: {
               <button
                 onClick={() => volRole && addSlotMut.mutate()}
                 disabled={!volRole || addSlotMut.isPending}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
               >
                 <Plus size={14} />
               </button>
@@ -543,7 +543,7 @@ function EventPanel({ event, branchId, onClose }: {
             )}
             {volunteerSlots.map((slot: VolunteerSlot) => (
               <div key={slot.id} className="flex items-center gap-3 py-2 group">
-                <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-500 text-xs font-bold flex items-center justify-center shrink-0">
                   {slot.slots_needed}
                 </div>
                 <div className="flex-1">
@@ -641,14 +641,14 @@ export default function EventsPage() {
         loadingUpcoming ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white border border-gray-200 rounded-2xl p-4 flex gap-4 animate-pulse">
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 flex gap-4 animate-pulse">
                 <div className="w-14 h-14 rounded-xl bg-gray-100 shrink-0" />
                 <div className="flex-1 space-y-2"><div className="h-3 bg-gray-100 rounded w-3/4" /><div className="h-2.5 bg-gray-100 rounded w-1/2" /></div>
               </div>
             ))}
           </div>
         ) : upcoming?.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center text-gray-400 text-sm">
+          <div className="bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-400 text-sm">
             No upcoming events. Create one to get started.
           </div>
         ) : (
@@ -678,14 +678,14 @@ export default function EventsPage() {
               <button key={t.value} onClick={() => { setTypeFilter(t.value); setPage(1); }}
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
-                  typeFilter === t.value ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300",
+                  typeFilter === t.value ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300",
                 )}>
                 {t.label}
               </button>
             ))}
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
             {loadingAll ? (
               <div className="divide-y divide-gray-50">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -730,7 +730,7 @@ export default function EventsPage() {
                         <td className="px-4 py-3 text-sm text-gray-500">{fmtDateTime(ev.start_datetime)}</td>
                         <td className="px-4 py-3 text-sm text-gray-400 hidden md:table-cell">{ev.venue || "—"}</td>
                         <td className="px-4 py-3 text-sm text-center text-gray-600 hidden lg:table-cell">
-                          <button onClick={() => setDetailEvent(ev)} className="hover:text-blue-600 transition-colors">
+                          <button onClick={() => setDetailEvent(ev)} className="hover:text-gray-700 transition-colors">
                             {ev.registration_count}{ev.capacity ? ` / ${ev.capacity}` : ""}
                           </button>
                         </td>
@@ -742,7 +742,7 @@ export default function EventsPage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => setDetailEvent(ev)} title="Details"
-                              className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors">
+                              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                               <Users size={14} />
                             </button>
                             <button onClick={() => openEdit(ev)} title="Edit"

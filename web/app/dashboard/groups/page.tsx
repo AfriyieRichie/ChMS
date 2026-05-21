@@ -92,7 +92,7 @@ function GroupForm({ branchId, editing, allGroups, onClose }: {
 
   return (
     <form onSubmit={handleSubmit((d) => editing ? updateMut.mutate(d) : createMut.mutate(d))}
-      className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+      className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-gray-900 text-sm">{editing ? "Edit Group" : "New Group"}</h2>
         <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
@@ -253,7 +253,7 @@ function GroupPanel({ group, branchId, onClose }: {
           <button key={t.key} onClick={() => setTab(t.key)}
             className={cn(
               "py-2.5 px-3 text-sm font-medium border-b-2 transition-colors -mb-px",
-              tab === t.key ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700",
+              tab === t.key ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700",
             )}>
             {t.label}
           </button>
@@ -339,7 +339,7 @@ function GroupPanel({ group, branchId, onClose }: {
                 placeholder="Notes (optional)"
                 className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500" />
               <button onClick={() => logMeetingMut.mutate()} disabled={logMeetingMut.isPending || !meetingDate}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-1">
+                className="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors flex items-center gap-1">
                 <ClipboardList size={14} /> Log
               </button>
             </div>
@@ -392,7 +392,7 @@ function GroupPanel({ group, branchId, onClose }: {
                       onClick={() => decideMut.mutate({ id: req.id, decision: "approve" })}
                       disabled={decideMut.isPending}
                       title="Approve"
-                      className="p-1.5 rounded-lg hover:bg-emerald-50 text-gray-400 hover:text-emerald-600 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                     >
                       <CheckCircle size={16} />
                     </button>
@@ -423,7 +423,7 @@ function GroupCard({ group, onEdit, onDelete, onOpen }: {
   group: Group; onEdit: () => void; onDelete: () => void; onOpen: () => void;
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm group hover:shadow-md hover:border-gray-300 transition-all">
+    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm group hover:shadow-md hover:border-gray-300 transition-all">
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
@@ -524,7 +524,7 @@ export default function GroupsPage() {
           <button key={t.value} onClick={() => setTypeFilter(t.value)}
             className={cn(
               "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
-              typeFilter === t.value ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300",
+              typeFilter === t.value ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300",
             )}>
             {t.label}
           </button>
@@ -542,7 +542,7 @@ export default function GroupsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white border border-gray-200 rounded-2xl p-4 animate-pulse space-y-3">
+            <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse space-y-3">
               <div className="flex justify-between"><div className="h-4 bg-gray-100 rounded w-32" /><div className="h-5 bg-gray-100 rounded-full w-20" /></div>
               <div className="h-3 bg-gray-100 rounded w-24" />
               <div className="h-3 bg-gray-100 rounded w-16 mt-auto" />
@@ -550,7 +550,7 @@ export default function GroupsPage() {
           ))}
         </div>
       ) : groups.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center text-gray-400 text-sm">
+        <div className="bg-white border border-gray-200 rounded-lg p-12 text-center text-gray-400 text-sm">
           No groups found. Create one to get started.
         </div>
       ) : (

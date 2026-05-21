@@ -35,7 +35,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_COLOR: Record<string, string> = {
   active: "bg-green-500", visitor: "bg-blue-400", inactive: "bg-gray-300",
-  new_convert: "bg-purple-400", transferred: "bg-amber-400", deceased: "bg-red-300",
+  new_convert: "bg-gray-100", transferred: "bg-gray-100", deceased: "bg-red-300",
 };
 
 const STAGE_LABELS: Record<string, string> = {
@@ -186,7 +186,7 @@ function AttendanceTab() {
                 <div key={s.service_type__name} className="flex items-center gap-3">
                   <span className="text-xs text-gray-500 w-28 shrink-0 truncate">{s.service_type__name}</span>
                   <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                    <div className="bg-purple-500 h-full rounded-full" style={{ width: `${pct}%` }} />
+                    <div className="bg-gray-100 h-full rounded-full" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-xs text-gray-600 w-20 text-right">{s.total.toLocaleString()}</span>
                 </div>
@@ -248,7 +248,7 @@ function AttendanceTab() {
 
 // ── Visitor Conversion ────────────────────────────────────────────────────────
 
-const FUNNEL_COLORS = ["bg-blue-500", "bg-purple-500", "bg-emerald-500"];
+const FUNNEL_COLORS = ["bg-blue-500", "bg-gray-100", "bg-gray-100"];
 
 function ConversionTab() {
   const [months, setMonths] = useState(3);
@@ -274,7 +274,7 @@ function ConversionTab() {
           {[1, 3, 6, 12].map((m) => <option key={m} value={m}>Last {m} month{m > 1 ? "s" : ""}</option>)}
         </select>
         {data && firstVisits > 0 && (
-          <span className="ml-auto text-sm font-semibold text-purple-700">
+          <span className="ml-auto text-sm font-semibold text-gray-600">
             {conversionRate}% visit → member
           </span>
         )}
@@ -323,8 +323,8 @@ function ConversionTab() {
                     <div key={m.month} className="flex flex-col items-center gap-1 min-w-[60px]">
                       <div className="flex items-end gap-0.5 h-28">
                         <div className="w-3 bg-blue-500 rounded-t-sm" style={{ height: `${Math.max(4, h1)}%` }} title={`${m.first_visits} visits`} />
-                        <div className="w-3 bg-purple-400 rounded-t-sm" style={{ height: `${Math.max(0, h2)}%` }} title={`${m.followed_up} followed up`} />
-                        <div className="w-3 bg-emerald-500 rounded-t-sm" style={{ height: `${Math.max(0, h3)}%` }} title={`${m.converted} converted`} />
+                        <div className="w-3 bg-gray-100 rounded-t-sm" style={{ height: `${Math.max(0, h2)}%` }} title={`${m.followed_up} followed up`} />
+                        <div className="w-3 bg-gray-100 rounded-t-sm" style={{ height: `${Math.max(0, h3)}%` }} title={`${m.converted} converted`} />
                       </div>
                       <span className="text-[9px] text-gray-400 rotate-45 origin-left whitespace-nowrap mt-1">{monthLabel(m.month)}</span>
                     </div>
@@ -333,8 +333,8 @@ function ConversionTab() {
               </div>
               <div className="mt-3 flex gap-4 text-xs text-gray-500">
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-500 inline-block" /> Visits</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-purple-400 inline-block" /> Followed Up</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-500 inline-block" /> Became Member</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 inline-block" /> Followed Up</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 inline-block" /> Became Member</span>
               </div>
             </div>
           )}
@@ -351,7 +351,7 @@ function ConversionTab() {
                     <div key={h.how_heard} className="flex items-center gap-3">
                       <span className="text-xs text-gray-500 w-36 shrink-0 capitalize">{h.how_heard.replace(/_/g, " ")}</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                        <div className="bg-amber-400 h-full rounded-full" style={{ width: `${pct}%` }} />
+                        <div className="bg-gray-100 h-full rounded-full" style={{ width: `${pct}%` }} />
                       </div>
                       <span className="text-xs text-gray-600 w-16 text-right">{h.count} ({pct}%)</span>
                     </div>
@@ -396,20 +396,20 @@ function DiscipleshipTab() {
               const dropped = droppedMap[stage] ?? 0;
               return (
                 <div key={stage} className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 text-xs font-bold flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0">
                     {i + 1}
                   </div>
                   <div className="w-36 shrink-0">
                     <p className="text-sm text-gray-700">{STAGE_LABELS[stage] ?? stage}</p>
                   </div>
                   <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden flex">
-                    <div className="bg-purple-500 h-full" style={{ width: `${Math.round((done / maxCount) * 100)}%` }} />
-                    <div className="bg-amber-400 h-full" style={{ width: `${Math.round((inP / maxCount) * 100)}%` }} />
+                    <div className="bg-gray-100 h-full" style={{ width: `${Math.round((done / maxCount) * 100)}%` }} />
+                    <div className="bg-gray-100 h-full" style={{ width: `${Math.round((inP / maxCount) * 100)}%` }} />
                     <div className="bg-red-300 h-full" style={{ width: `${Math.round((dropped / maxCount) * 100)}%` }} />
                   </div>
                   <div className="w-36 text-right shrink-0 space-x-1">
-                    {done > 0 && <span className="text-xs text-purple-700 font-medium">{done} done</span>}
-                    {inP > 0 && <span className="text-xs text-amber-600">{done > 0 ? "· " : ""}{inP} active</span>}
+                    {done > 0 && <span className="text-xs text-gray-600 font-medium">{done} done</span>}
+                    {inP > 0 && <span className="text-xs text-gray-500">{done > 0 ? "· " : ""}{inP} active</span>}
                     {dropped > 0 && <span className="text-xs text-red-400">{(done > 0 || inP > 0) ? "· " : ""}{dropped} dropped</span>}
                   </div>
                 </div>
@@ -417,8 +417,8 @@ function DiscipleshipTab() {
             })}
           </div>
           <div className="mt-4 flex gap-4 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-purple-500 inline-block" /> Completed</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-400 inline-block" /> In Progress</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 inline-block" /> Completed</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 inline-block" /> In Progress</span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-300 inline-block" /> Dropped</span>
           </div>
         </div>
@@ -432,7 +432,7 @@ function DiscipleshipTab() {
 function TrendBadge({ trend, delta }: { trend: string; delta: number }) {
   if (trend === "growing") {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
         ↑ +{delta}
       </span>
     );
@@ -466,7 +466,7 @@ function GroupHealthTab() {
       ) : !groups.length ? (
         <p className="text-center text-gray-400 text-sm py-8">No groups found.</p>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
           <table className="min-w-full divide-y divide-gray-100">
             <thead>
               <tr className="bg-gray-50">
@@ -538,7 +538,7 @@ function PastoralCareTab() {
           <p className="text-sm text-gray-400">All members have been seen in the last {weeks} weeks.</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
           <table className="min-w-full divide-y divide-gray-100">
             <thead>
               <tr className="bg-gray-50">
@@ -562,7 +562,7 @@ function PastoralCareTab() {
                       {neverSeen ? (
                         <span className="text-red-500 text-xs font-medium">Never recorded</span>
                       ) : (
-                        <span className="text-amber-600">{m.last_seen} <span className="text-gray-400 text-xs">({daysAgo}d ago)</span></span>
+                        <span className="text-gray-500">{m.last_seen} <span className="text-gray-400 text-xs">({daysAgo}d ago)</span></span>
                       )}
                     </td>
                     <td className="px-4 py-2.5 text-sm text-gray-500 hidden md:table-cell">{m.phone || "—"}</td>
@@ -594,7 +594,7 @@ export default function ReportsPage() {
             className={cn(
               "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px whitespace-nowrap shrink-0",
               tab === t.id
-                ? "border-blue-600 text-blue-700"
+                ? "border-gray-900 text-blue-700"
                 : "border-transparent text-gray-500 hover:text-gray-700",
             )}
           >

@@ -80,7 +80,7 @@ function ProfileTab() {
     <div className="space-y-6 max-w-lg">
       {/* Avatar */}
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold shrink-0">
+        <div className="w-16 h-16 rounded-full bg-neutral-800 flex items-center justify-center text-white text-2xl font-bold shrink-0">
           {me?.full_name ? initials(me.full_name) : "?"}
         </div>
         <div>
@@ -258,7 +258,7 @@ function NotificationsTab() {
                   disabled={mut.isPending}
                   className={cn(
                     "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors",
-                    checked ? "bg-blue-600" : "bg-gray-200",
+                    checked ? "bg-neutral-800" : "bg-gray-200",
                     mut.isPending && "opacity-60",
                   )}
                 >
@@ -309,7 +309,7 @@ function GivingTab() {
 
   if (!data?.has_member_profile) {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-800 max-w-lg">
+      <div className="bg-gray-50 border border-gray-200 rounded p-5 text-sm text-gray-600 max-w-lg">
         Your account is not linked to a member profile. Contact your branch administrator.
       </div>
     );
@@ -392,7 +392,7 @@ function AttendanceTab() {
 
   if (!data?.has_member_profile) {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-800 max-w-lg">
+      <div className="bg-gray-50 border border-gray-200 rounded p-5 text-sm text-gray-600 max-w-lg">
         Your account is not linked to a member profile. Contact your branch administrator.
       </div>
     );
@@ -442,7 +442,7 @@ function GroupsTab() {
 
   if (!data?.has_member_profile) {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-800 max-w-lg">
+      <div className="bg-gray-50 border border-gray-200 rounded p-5 text-sm text-gray-600 max-w-lg">
         Your account is not linked to a member profile. Contact your branch administrator.
       </div>
     );
@@ -469,7 +469,7 @@ function GroupsTab() {
           <div className="divide-y divide-gray-50">
             {active.map((g) => (
               <div key={g.group_id} className="flex items-center gap-3 px-4 py-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 text-xs font-semibold shrink-0">
                   {g.group_name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -536,7 +536,7 @@ export default function ProfilePage() {
             className={cn(
               "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px whitespace-nowrap shrink-0",
               tab === t.id
-                ? "border-blue-600 text-blue-700"
+                ? "border-gray-900 text-blue-700"
                 : "border-transparent text-gray-500 hover:text-gray-700",
             )}
           >

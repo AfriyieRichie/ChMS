@@ -157,7 +157,7 @@ function BranchPanel({
         {branch.logo ? (
           <img src={branch.logo} alt={branch.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
         ) : (
-          <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-gray-900 text-white flex items-center justify-center font-bold text-sm shrink-0">
             {logoInitial}
           </div>
         )}
@@ -189,7 +189,7 @@ function BranchPanel({
             onClick={() => setTab(t)}
             className={cn(
               "flex-1 py-2.5 text-xs font-semibold capitalize transition-colors",
-              tab === t ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700",
+              tab === t ? "text-gray-900 border-b-2 border-gray-900" : "text-gray-500 hover:text-gray-700",
             )}
           >
             {t === "transfers" ? "Transfer Log" : "Profile"}
@@ -352,10 +352,10 @@ function BranchPanel({
                   <div key={t.id} className="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">
                     <div className={cn(
                       "w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5",
-                      t.direction === "in" ? "bg-emerald-100" : "bg-red-100",
+                      t.direction === "in" ? "bg-gray-100" : "bg-red-100",
                     )}>
                       {t.direction === "in"
-                        ? <ArrowRight size={12} className="text-emerald-600" />
+                        ? <ArrowRight size={12} className="text-gray-600" />
                         : <ArrowLeft size={12} className="text-red-500" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -455,7 +455,7 @@ export default function BranchesPage() {
       {showForm && (
         <form
           onSubmit={handleSubmit((d) => createMut.mutate(d))}
-          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4"
+          className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4"
         >
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-gray-900 text-sm">New Branch</h2>
@@ -523,7 +523,7 @@ export default function BranchesPage() {
       {isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-white border border-gray-200 rounded-2xl p-4 animate-pulse space-y-2">
+            <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse space-y-2">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-100 rounded-xl" />
                 <div className="flex-1 space-y-1.5">
@@ -544,7 +544,7 @@ export default function BranchesPage() {
               key={branch.id}
               onClick={() => setSelected(branch)}
               className={cn(
-                "bg-white border rounded-2xl p-4 shadow-sm cursor-pointer transition-all space-y-3 hover:shadow-md",
+                "bg-white border rounded-lg p-4 shadow-sm cursor-pointer transition-all space-y-3 hover:shadow-md",
                 selected?.id === branch.id ? "border-blue-400 ring-1 ring-blue-400" : "border-gray-200",
               )}
             >
@@ -552,7 +552,7 @@ export default function BranchesPage() {
                 {branch.logo ? (
                   <img src={branch.logo} alt={branch.name} className="w-11 h-11 rounded-xl object-cover shrink-0" />
                 ) : (
-                  <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-gray-900 text-white flex items-center justify-center font-bold text-sm shrink-0">
                     {branch.name.slice(0, 2).toUpperCase()}
                   </div>
                 )}

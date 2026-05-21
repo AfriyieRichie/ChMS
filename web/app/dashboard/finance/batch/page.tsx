@@ -297,7 +297,7 @@ export default function BatchEntryPage() {
         </PageHeader>
 
         {/* Start new batch */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-4">
           <h2 className="font-semibold text-gray-900 text-sm">Start New Batch</h2>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2 space-y-1">
@@ -368,7 +368,7 @@ export default function BatchEntryPage() {
         {postedBatches.length > 0 && (
           <div>
             <h2 className="text-sm font-semibold text-gray-700 mb-3">Posted Batches</h2>
-            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead>
                   <tr className="bg-gray-50">
@@ -441,7 +441,7 @@ export default function BatchEntryPage() {
       </div>
 
       {/* Entry grid */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         {/* Header */}
         <div className="grid grid-cols-[180px_140px_90px_110px_110px_36px] gap-2 px-3 py-2 bg-gray-50 border-b border-gray-100">
           {["Member", "Fund", "Amount", "Method", "Reference", ""].map((h, i) => (

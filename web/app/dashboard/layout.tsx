@@ -68,13 +68,13 @@ function NavLink({ href, label, Icon, active }: NavItem & { active: boolean }) {
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
         active
-          ? "bg-blue-600 text-white"
-          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+          ? "bg-white/[0.08] text-white font-medium"
+          : "text-neutral-400 hover:bg-white/[0.05] hover:text-neutral-200 font-normal"
       }`}
     >
-      <Icon size={16} className="shrink-0" />
+      <Icon size={15} className="shrink-0" />
       {label}
     </Link>
   );
@@ -102,12 +102,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-60 bg-slate-900 flex flex-col shrink-0">
+      <aside className="w-56 bg-neutral-900 flex flex-col shrink-0">
         {/* Logo */}
-        <div className="px-5 py-[18px] border-b border-slate-800 shrink-0">
+        <div className="px-4 py-4 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
-              <span className="text-white text-xs font-bold">C</span>
+            <div className="w-6 h-6 rounded border border-white/20 flex items-center justify-center shrink-0">
+              <span className="text-white text-[10px] font-semibold tracking-tight">
+                {(process.env.NEXT_PUBLIC_APP_NAME ?? "C")[0]}
+              </span>
             </div>
             <span className="font-semibold text-white text-sm tracking-tight">
               {process.env.NEXT_PUBLIC_APP_NAME ?? "ChMS"}
@@ -116,7 +118,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-4 px-3 overflow-y-auto space-y-5">
+        <nav className="flex-1 py-3 px-2 overflow-y-auto space-y-4">
           <div className="space-y-0.5">
             {NAV_TOP.map(({ href, label, Icon }) => (
               <NavLink key={href} href={href} label={label} Icon={Icon} active={isActive(href)} />
@@ -125,7 +127,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
           {NAV_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="px-3 mb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+              <p className="px-3 mb-1.5 text-[9px] font-semibold text-neutral-500 uppercase tracking-widest">
                 {group.label}
               </p>
               <div className="space-y-0.5">
@@ -138,16 +140,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </nav>
 
         {/* Bottom */}
-        <div className="p-3 border-t border-slate-800 shrink-0 space-y-0.5">
+        <div className="p-2 border-t border-white/[0.06] shrink-0 space-y-0.5">
           <NavLink href="/dashboard/profile" label="My Profile" Icon={UserCircle} active={isActive("/dashboard/profile")} />
           <button
             onClick={() => {
               setAccessToken(null);
               window.location.href = "/login";
             }}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-normal text-neutral-400 hover:bg-white/[0.05] hover:text-neutral-200 transition-colors"
           >
-            <LogOut size={16} className="shrink-0" />
+            <LogOut size={15} className="shrink-0" />
             Sign out
           </button>
         </div>
@@ -156,7 +158,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Right column */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-end px-6 shrink-0 gap-4">
+        <header className="h-12 bg-white border-b border-gray-200 flex items-center justify-end px-6 shrink-0 gap-4">
           <span className="text-xs text-gray-400 hidden sm:block">
             {new Date().toLocaleDateString("en-GH", {
               weekday: "short",
@@ -167,7 +169,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </span>
           <Link
             href="/dashboard/profile"
-            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold hover:bg-blue-700 transition-colors shrink-0"
+            className="w-7 h-7 rounded-full bg-neutral-800 flex items-center justify-center text-white text-[10px] font-semibold hover:bg-neutral-700 transition-colors shrink-0"
             title={me?.full_name ?? "Profile"}
           >
             {userInitials}

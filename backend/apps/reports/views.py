@@ -73,7 +73,8 @@ def attendance_trends(request):
     months = min(int(request.query_params.get("months", 6)), 24)
     start = date.today() - timedelta(days=months * 31)
 
-    from apps.attendance.models import AttendanceRecord
+    from apps.attendance.models import AttendanceRecord, AttendanceEntry
+    from apps.members.models import Member
 
     by_month = list(
         AttendanceRecord.objects.filter(branch=branch, date__gte=start)
@@ -86,11 +87,61 @@ def attendance_trends(request):
     by_service = list(
         AttendanceRecord.objects.filter(branch=branch, date__gte=start)
         .values("service_type__name")
-        .annotate(total=Sum("total_count"), sessions=Count("id"), avg=Sum("total_count") / Count("id"))
+        .annotate(
+            total=Sum("total_count"),
+            sessions=Count("id"),
+            avg=Sum("total_count") / Count("id"),
+        )
         .order_by("-total")
     )
 
-    return Response({"by_month": by_month, "by_service": by_service})
+    # Gender breakdown — distinct members who attended in this period
+    by_gender = list(
+        Member.objects.filter(
+            attendance_entries__attendance_record__branch=branch,
+            attendance_entries__attendance_record__date__gte=start,
+            deleted_at__isnull=True,
+        )
+        .exclude(gender="")
+        .values("gender")
+        .annotate(count=Count("id", distinct=True))
+    )
+
+    # Age-group breakdown — computed in Python to avoid complex SQL date arithmetic
+    dobs = list(
+        Member.objects.filter(
+            attendance_entries__attendance_record__branch=branch,
+            attendance_entries__attendance_record__date__gte=start,
+            date_of_birth__isnull=False,
+            deleted_at__isnull=True,
+        )
+        .distinct()
+        .values_list("date_of_birth", flat=True)
+    )
+
+    today = date.today()
+    age_groups = {"Under 18": 0, "18–30": 0, "31–45": 0, "46–60": 0, "Over 60": 0}
+    for dob in dobs:
+        age = (today - dob).days // 365
+        if age < 18:
+            age_groups["Under 18"] += 1
+        elif age <= 30:
+            age_groups["18–30"] += 1
+        elif age <= 45:
+            age_groups["31–45"] += 1
+        elif age <= 60:
+            age_groups["46–60"] += 1
+        else:
+            age_groups["Over 60"] += 1
+
+    by_age_group = [{"group": k, "count": v} for k, v in age_groups.items() if v > 0]
+
+    return Response({
+        "by_month": by_month,
+        "by_service": by_service,
+        "by_gender": by_gender,
+        "by_age_group": by_age_group,
+    })
 
 
 # ── Visitor Conversion ────────────────────────────────────────────────────────
@@ -102,39 +153,50 @@ def visitor_conversion(request):
     months = min(int(request.query_params.get("months", 3)), 12)
     start = date.today() - timedelta(days=months * 31)
 
-    from apps.attendance.models import FirstTimeVisitor, AttendanceRecord
-    from apps.members.models import Member
+    from apps.attendance.models import FirstTimeVisitor
 
-    first_visits = FirstTimeVisitor.objects.filter(
+    # Monthly trend: first visits, follow-ups, conversions
+    by_month = list(
+        FirstTimeVisitor.objects.filter(
+            attendance_record__branch=branch,
+            attendance_record__date__gte=start,
+        )
+        .annotate(month=TruncMonth("attendance_record__date"))
+        .values("month")
+        .annotate(
+            first_visits=Count("id"),
+            followed_up=Count("id", filter=Q(followed_up=True)),
+            converted=Count("id", filter=Q(converted_to_member__isnull=False)),
+        )
+        .order_by("month")
+    )
+
+    # Period totals for funnel
+    base_qs = FirstTimeVisitor.objects.filter(
         attendance_record__branch=branch,
         attendance_record__date__gte=start,
-    ).count()
+    )
+    total_first = base_qs.count()
+    total_followed = base_qs.filter(followed_up=True).count()
+    total_converted = base_qs.filter(converted_to_member__isnull=False).count()
 
-    new_members = Member.objects.filter(
-        branch_memberships__branch=branch,
-        branch_memberships__joined_at__gte=start,
-        membership_status__in=["active", "member"],
-    ).distinct().count()
-
-    total_active = Member.objects.filter(
-        branch_memberships__branch=branch,
-        branch_memberships__left_at__isnull=True,
-        deleted_at__isnull=True,
-    ).count()
-
-    recent_visitors = Member.objects.filter(
-        branch_memberships__branch=branch,
-        branch_memberships__left_at__isnull=True,
-        membership_status="visitor",
-        deleted_at__isnull=True,
-    ).count()
+    # How they heard breakdown
+    how_heard = list(
+        base_qs.exclude(how_heard="")
+        .values("how_heard")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
 
     return Response({
         "period_months": months,
-        "first_time_visitors": first_visits,
-        "new_members": new_members,
-        "total_active_members": total_active,
-        "current_visitors": recent_visitors,
+        "funnel": [
+            {"step": "First Visit", "count": total_first},
+            {"step": "Followed Up", "count": total_followed},
+            {"step": "Became Member", "count": total_converted},
+        ],
+        "by_month": by_month,
+        "how_heard": how_heard,
     })
 
 
@@ -164,10 +226,17 @@ def discipleship_pipeline(request):
         .annotate(count=Count("id"))
     )
 
+    dropped = list(
+        DiscipleshipRecord.objects.filter(branch=branch, status="dropped")
+        .values("stage")
+        .annotate(count=Count("id"))
+    )
+
     return Response({
         "stage_order": STAGE_ORDER,
         "in_progress": in_progress,
         "completed": completed,
+        "dropped": dropped,
     })
 
 
@@ -178,24 +247,48 @@ def discipleship_pipeline(request):
 def group_health(request):
     branch = _branch(request)
     four_weeks_ago = date.today() - timedelta(weeks=4)
+    eight_weeks_ago = date.today() - timedelta(weeks=8)
 
     from apps.groups.models import Group
 
-    groups = list(
+    groups_qs = list(
         Group.objects.filter(branch=branch, deleted_at__isnull=True)
         .annotate(
             member_count=Count(
-                "memberships", filter=Q(memberships__left_at__isnull=True), distinct=True
+                "memberships",
+                filter=Q(memberships__left_at__isnull=True),
+                distinct=True,
+            ),
+            # Members who were in the group 8 weeks ago
+            count_8w_ago=Count(
+                "memberships",
+                filter=Q(memberships__joined_at__lte=eight_weeks_ago) & (
+                    Q(memberships__left_at__isnull=True) | Q(memberships__left_at__gte=eight_weeks_ago)
+                ),
+                distinct=True,
             ),
             recent_meetings=Count(
-                "meetings", filter=Q(meetings__date__gte=four_weeks_ago), distinct=True
+                "meetings",
+                filter=Q(meetings__date__gte=four_weeks_ago),
+                distinct=True,
             ),
         )
-        .values("id", "name", "type", "member_count", "recent_meetings")
+        .values("id", "name", "type", "leader__full_name", "member_count", "count_8w_ago", "recent_meetings")
         .order_by("-member_count")
     )
 
-    return Response({"groups": groups})
+    # Compute trend in Python
+    for g in groups_qs:
+        diff = g["member_count"] - g["count_8w_ago"]
+        if diff > 0:
+            g["trend"] = "growing"
+        elif diff < 0:
+            g["trend"] = "shrinking"
+        else:
+            g["trend"] = "stable"
+        g["trend_delta"] = diff
+
+    return Response({"groups": groups_qs})
 
 
 # ── Pastoral Care Alerts ──────────────────────────────────────────────────────

@@ -23,6 +23,8 @@ export async function getMembershipGrowth(branchId: number, months = 6): Promise
 export interface AttendanceTrends {
   by_month: { month: string; total: number; sessions: number }[];
   by_service: { service_type__name: string; total: number; sessions: number; avg: number }[];
+  by_gender: { gender: string; count: number }[];
+  by_age_group: { group: string; count: number }[];
 }
 
 export async function getAttendanceTrends(branchId: number, months = 6): Promise<AttendanceTrends> {
@@ -35,12 +37,18 @@ export async function getAttendanceTrends(branchId: number, months = 6): Promise
 
 // ── Visitor Conversion ────────────────────────────────────────────────────────
 
+export interface VisitorConversionMonth {
+  month: string;
+  first_visits: number;
+  followed_up: number;
+  converted: number;
+}
+
 export interface VisitorConversion {
   period_months: number;
-  first_time_visitors: number;
-  new_members: number;
-  total_active_members: number;
-  current_visitors: number;
+  funnel: { step: string; count: number }[];
+  by_month: VisitorConversionMonth[];
+  how_heard: { how_heard: string; count: number }[];
 }
 
 export async function getVisitorConversion(branchId: number, months = 3): Promise<VisitorConversion> {
@@ -57,6 +65,7 @@ export interface DiscipleshipPipeline {
   stage_order: string[];
   in_progress: { stage: string; count: number }[];
   completed: { stage: string; count: number }[];
+  dropped: { stage: string; count: number }[];
 }
 
 export async function getDiscipleshipPipeline(branchId: number): Promise<DiscipleshipPipeline> {
@@ -66,8 +75,19 @@ export async function getDiscipleshipPipeline(branchId: number): Promise<Discipl
 
 // ── Group Health ──────────────────────────────────────────────────────────────
 
+export interface GroupHealthItem {
+  id: number;
+  name: string;
+  type: string;
+  leader__full_name: string | null;
+  member_count: number;
+  recent_meetings: number;
+  trend: "growing" | "stable" | "shrinking";
+  trend_delta: number;
+}
+
 export interface GroupHealth {
-  groups: { id: number; name: string; type: string; member_count: number; recent_meetings: number }[];
+  groups: GroupHealthItem[];
 }
 
 export async function getGroupHealth(branchId: number): Promise<GroupHealth> {

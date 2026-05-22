@@ -14,7 +14,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { cn } from "@/lib/utils";
 
 const BRANCH_ID = 1;
-const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white";
+const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 bg-white";
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 type Tab = "by-member" | "top-givers" | "lapsed" | "periods";
@@ -58,7 +58,7 @@ function ByMemberTab() {
           <select
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
           >
             {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((y) => (
               <option key={y} value={y}>{y}</option>
@@ -131,11 +131,11 @@ function TopGiversTab() {
     <div className="space-y-4">
       <div className="flex items-center gap-3 flex-wrap">
         <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-          placeholder="From" className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+          placeholder="From" className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300" />
         <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-          placeholder="To" className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+          placeholder="To" className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300" />
         <select value={limit} onChange={(e) => setLimit(Number(e.target.value))}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300">
           {[10, 20, 50, 100].map((n) => <option key={n} value={n}>Top {n}</option>)}
         </select>
       </div>
@@ -193,7 +193,7 @@ function LapsedTab() {
       <div className="flex items-center gap-3">
         <label className="text-xs font-medium text-gray-600">Haven't given in</label>
         <select value={days} onChange={(e) => setDays(Number(e.target.value))}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300">
           {[30, 60, 90, 180, 365].map((d) => <option key={d} value={d}>{d} days</option>)}
         </select>
         {data && <span className="text-xs text-gray-400">{data.length} member{data.length !== 1 ? "s" : ""}</span>}
@@ -270,11 +270,11 @@ function PeriodsTab() {
       {showCreate && (
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-3">
           <select value={newYear} onChange={(e) => setNewYear(Number(e.target.value))}
-            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300">
             {Array.from({ length: 3 }, (_, i) => new Date().getFullYear() - i).map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
           <select value={newMonth} onChange={(e) => setNewMonth(Number(e.target.value))}
-            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300">
             {MONTH_NAMES.map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
           </select>
           <Button size="sm" onClick={() => createMut.mutate()} disabled={createMut.isPending}>

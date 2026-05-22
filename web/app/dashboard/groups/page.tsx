@@ -23,7 +23,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { cn } from "@/lib/utils";
 
 const BRANCH_ID = 1;
-const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white disabled:bg-gray-50";
+const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 bg-white disabled:bg-gray-50";
 
 const GROUP_TYPES = [
   { value: "cell",       label: "Cell Group" },
@@ -267,7 +267,7 @@ function GroupPanel({ group, branchId, onClose }: {
             <div className="relative">
               <input type="search" placeholder="Search members to add…" value={memberSearch}
                 onChange={(e) => setMemberSearch(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
               />
               {suggestions.length > 0 && memberSearch.length >= 2 && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-gray-200 shadow-xl z-10 max-h-48 overflow-auto">
@@ -286,7 +286,7 @@ function GroupPanel({ group, branchId, onClose }: {
             <div className="flex items-center gap-2">
               <label className="text-xs text-gray-500">Role:</label>
               <select value={role} onChange={(e) => setRole(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white">
+                className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 bg-white">
                 <option value="member">Member</option>
                 <option value="co_leader">Co-Leader</option>
                 <option value="leader">Leader</option>
@@ -329,15 +329,15 @@ function GroupPanel({ group, branchId, onClose }: {
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Log a meeting</p>
             <div className="flex gap-2">
               <input type="date" value={meetingDate} onChange={(e) => setMeetingDate(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500" />
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" />
               <input type="number" min="0" value={meetingCount} onChange={(e) => setMeetingCount(Number(e.target.value))}
                 placeholder="# present"
-                className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500" />
+                className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" />
             </div>
             <div className="flex gap-2">
               <input type="text" value={meetingNotes} onChange={(e) => setMeetingNotes(e.target.value)}
                 placeholder="Notes (optional)"
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500" />
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" />
               <button onClick={() => logMeetingMut.mutate()} disabled={logMeetingMut.isPending || !meetingDate}
                 className="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors flex items-center gap-1">
                 <ClipboardList size={14} /> Log

@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { contributionSchema, type ContributionFormValues } from "@/lib/schemas/finance";
 
 const BRANCH_ID = 1;
-const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white disabled:bg-gray-50";
+const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 bg-white disabled:bg-gray-50";
 
 const PAYMENT_METHODS = [
   { value: "cash",          label: "Cash" },

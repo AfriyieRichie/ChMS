@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { setAccessToken } from "@/lib/api";
 import { getMe } from "@/lib/api/users";
 import {
@@ -21,6 +21,8 @@ import {
   History,
   UserCircle,
   LogOut,
+  Search,
+  Bell,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -91,28 +93,38 @@ function initials(name: string) {
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe, staleTime: 600_000 });
+  const [search, setSearch] = useState("");
 
   function isActive(href: string) {
     return pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
   }
 
   const userInitials = me?.full_name ? initials(me.full_name) : "?";
+  const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "ChMS";
+  const appAbbr = appName.slice(0, 2).toUpperCase();
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    if (search.trim()) {
+      router.push(`/dashboard/members?search=${encodeURIComponent(search.trim())}`);
+      setSearch("");
+    }
+  }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-100">
       {/* Sidebar */}
       <aside className="w-56 bg-neutral-900 flex flex-col shrink-0">
         {/* Logo */}
         <div className="px-4 py-4 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded border border-white/20 flex items-center justify-center shrink-0">
-              <span className="text-white text-[10px] font-semibold tracking-tight">
-                {(process.env.NEXT_PUBLIC_APP_NAME ?? "C")[0]}
-              </span>
+            <div className="w-8 h-8 rounded-md bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+              <span className="text-white text-xs font-bold tracking-tight">{appAbbr}</span>
             </div>
-            <span className="font-semibold text-white text-sm tracking-tight">
-              {process.env.NEXT_PUBLIC_APP_NAME ?? "ChMS"}
+            <span className="font-semibold text-white text-sm tracking-tight leading-tight">
+              {appName}
             </span>
           </div>
         </div>
@@ -158,22 +170,50 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Right column */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-12 bg-white border-b border-gray-200 flex items-center justify-end px-6 shrink-0 gap-4">
-          <span className="text-xs text-gray-400 hidden sm:block">
-            {new Date().toLocaleDateString("en-GH", {
-              weekday: "short",
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}
-          </span>
-          <Link
-            href="/dashboard/profile"
-            className="w-7 h-7 rounded-full bg-neutral-800 flex items-center justify-center text-white text-[10px] font-semibold hover:bg-neutral-700 transition-colors shrink-0"
-            title={me?.full_name ?? "Profile"}
-          >
-            {userInitials}
-          </Link>
+        <header className="h-14 bg-white border-b border-gray-200 flex items-center px-5 shrink-0 gap-4">
+          {/* Search */}
+          <form onSubmit={handleSearch} className="flex-1 max-w-sm">
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search people, groups, events…"
+                className="w-full pl-8 pr-3 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-400 transition-colors"
+              />
+            </div>
+          </form>
+
+          <div className="flex items-center gap-1 ml-auto">
+            {/* Date */}
+            <span className="text-xs text-gray-400 hidden lg:block mr-3">
+              {new Date().toLocaleDateString("en-GH", {
+                weekday: "short",
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+
+            {/* Notifications */}
+            <button
+              className="relative p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              title="Notifications"
+            >
+              <Bell size={17} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+            </button>
+
+            {/* Avatar */}
+            <Link
+              href="/dashboard/profile"
+              className="ml-1 w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-white text-[11px] font-semibold hover:bg-neutral-700 transition-colors shrink-0"
+              title={me?.full_name ?? "Profile"}
+            >
+              {userInitials}
+            </Link>
+          </div>
         </header>
 
         {/* Scrollable content */}

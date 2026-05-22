@@ -67,7 +67,7 @@ function MembershipTab() {
       <div className="flex items-center gap-3">
         <label className="text-xs font-medium text-gray-600">Period</label>
         <select value={months} onChange={(e) => setMonths(Number(e.target.value))}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300">
           {[3, 6, 12, 24].map((m) => <option key={m} value={m}>Last {m} months</option>)}
         </select>
       </div>
@@ -144,7 +144,7 @@ function AttendanceTab() {
       <div className="flex items-center gap-3">
         <label className="text-xs font-medium text-gray-600">Period</label>
         <select value={months} onChange={(e) => setMonths(Number(e.target.value))}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300">
           {[3, 6, 12, 24].map((m) => <option key={m} value={m}>Last {m} months</option>)}
         </select>
       </div>
@@ -270,7 +270,7 @@ function ConversionTab() {
       <div className="flex items-center gap-3">
         <label className="text-xs font-medium text-gray-600">Period</label>
         <select value={months} onChange={(e) => setMonths(Number(e.target.value))}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300">
           {[1, 3, 6, 12].map((m) => <option key={m} value={m}>Last {m} month{m > 1 ? "s" : ""}</option>)}
         </select>
         {data && firstVisits > 0 && (
@@ -525,7 +525,7 @@ function PastoralCareTab() {
       <div className="flex items-center gap-3">
         <label className="text-xs font-medium text-gray-600">Not seen in</label>
         <select value={weeks} onChange={(e) => setWeeks(Number(e.target.value))}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300">
           {[2, 4, 6, 8, 12].map((w) => <option key={w} value={w}>{w} weeks</option>)}
         </select>
         {data && <span className="text-xs text-gray-400">{members.length} member{members.length !== 1 ? "s" : ""}</span>}

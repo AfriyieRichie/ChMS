@@ -27,7 +27,7 @@ const OBJECT_TYPES = [
   "Branch", "Group", "Event", "Campaign", "User",
 ];
 
-const FIELD = "border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white";
+const FIELD = "border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 bg-white";
 
 function DiffCell({ before, after }: { before: Record<string, unknown> | null; after: Record<string, unknown> | null }) {
   if (!before && !after) return null;

@@ -25,7 +25,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { cn } from "@/lib/utils";
 
 const BRANCH_ID = 1;
-const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white disabled:bg-gray-50";
+const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 bg-white disabled:bg-gray-50";
 
 const CHANNELS = [
   { value: "sms",      label: "SMS",              icon: "💬" },
@@ -788,7 +788,7 @@ function CampaignsTab({ branchId }: { branchId: number }) {
                         ) : (
                           <div className="flex items-center gap-1">
                             <input type="datetime-local" value={scheduleAt} onChange={(e) => setScheduleAt(e.target.value)}
-                              className="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                              className="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300" />
                             <button onClick={() => { if (scheduleAt) scheduleMut.mutate({ id: c.id, at: scheduleAt }); setScheduleMode(false); }}
                               disabled={!scheduleAt || scheduleMut.isPending}
                               className="text-xs text-blue-600 font-medium hover:underline disabled:opacity-50">OK</button>
@@ -839,7 +839,7 @@ function LogTab({ branchId }: { branchId: number }) {
         <div className="relative flex-1 max-w-xs">
           <input type="search" placeholder="Filter by member…" value={selectedMember ? selectedMember.name : memberSearch}
             onChange={(e) => { setMemberSearch(e.target.value); if (selectedMember) setSelectedMember(null); setPage(1); }}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
           />
           {(membersData?.results ?? []).length > 0 && memberSearch.length >= 2 && !selectedMember && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-gray-200 shadow-xl z-10 max-h-48 overflow-auto">

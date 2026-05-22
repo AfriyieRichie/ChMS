@@ -24,7 +24,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { cn } from "@/lib/utils";
 
 const BRANCH_ID = 1;
-const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white disabled:bg-gray-50";
+const FIELD = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 bg-white disabled:bg-gray-50";
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 const HOW_HEARD_LABELS: Record<string, string> = {
@@ -635,7 +635,7 @@ function ReportsTab() {
           <select
             value={weeksAgo}
             onChange={(e) => setWeeksAgo(Number(e.target.value))}
-            className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gray-300"
           >
             {[2, 4, 6, 8, 12].map((w) => <option key={w} value={w}>Last {w} weeks</option>)}
           </select>
@@ -790,7 +790,7 @@ function ServiceTypesTab() {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && newName.trim()) { e.preventDefault(); createMut.mutate(newName.trim()); } }}
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white"
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 bg-white"
         />
         <Button size="sm" disabled={!newName.trim() || createMut.isPending}
           onClick={() => { if (newName.trim()) createMut.mutate(newName.trim()); }}>
